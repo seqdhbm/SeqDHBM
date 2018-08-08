@@ -1,0 +1,642 @@
+********************************************************************************
+SeqD-HBM_Linux_Win.py v0.9
+SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs
+Wednesday , June-06-2018, 14:37:51
+********************************************************************************
+C:\Users\swathi_2208\sciebo\HRMSpottertool\Windows_Tests
+NOTE : Your input file is: Marie_Input.txt
+--------------------------
+INPUT FILE CONTENT SUMMARY:
+--------------------------
+NOTE : Your input file contains 5 sequence(s)
+--------------------------
+SEQUENCE VALIDITY CHECK:
+--------------------------
+NOTE : All the 5 sequences were verified to be valid !
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+WORKING ON THE VALID SEQUENCE 1 . sp|P00451|FA8_HUMAN Coagulation factor VIII OS=Homo sapiens OX=9606 GN=F8 PE=1 SV=1
+--------------------------------------------------------------------------------
+MQIELSTCFFLCLLRFCFSATRRYYLGAVELSWDYMQSDLGELPVDARFPPRVPKSFPFNTSVVYKKTLFVEFTDHLFNIAKPRPPWMGLLGPTIQAEVYDTVVITLKNMASHPVSLHAVGVSYWKASEGAEYDDQTSQREKEDDKVFPGGSHTYVWQVLKENGPMASDPLCLTYSYLSHVDLVKDLNSGLIGALLVCREGSLAKEKTQTLHKFILLFAVFDEGKSWHSETKNSLMQDRDAASARAWPKMHTVNGYVNRSLPGLIGCHRKSVYWHVIGMGTTPEVHSIFLEGHTFLVRNHRQASLEISPITFLTAQTLLMDLGQFLLFCHISSHQHDGMEAYVKVDSCPEEPQLRMKNNEEAEDYDDDLTDSEMDVVRFDDDNSPSFIQIRSVAKKHPKTWVHYIAAEEEDWDYAPLVLAPDDRSYKSQYLNNGPQRIGRKYKKVRFMAYTDETFKTREAIQHESGILGPLLYGEVGDTLLIIFKNQASRPYNIYPHGITDVRPLYSRRLPKGVKHLKDFPILPGEIFKYKWTVTVEDGPTKSDPRCLTRYYSSFVNMERDLASGLIGPLLICYKESVDQRGNQIMSDKRNVILFSVFDENRSWYLTENIQRFLPNPAGVQLEDPEFQASNIMHSINGYVFDSLQLSVCLHEVAYWYILSIGAQTDFLSVFFSGYTFKHKMVYEDTLTLFPFSGETVFMSMENPGLWILGCHNSDFRNRGMTALLKVSSCDKNTGDYYEDSYEDISAYLLSKNNAIEPRSFSQNSRHPSTRQKQFNATTIPENDIEKTDPWFAHRTPMPKIQNVSSSDLLMLLRQSPTPHGLSLSDLQEAKYETFSDDPSPGAIDSNNSLSEMTHFRPQLHHSGDMVFTPESGLQLRLNEKLGTTAATELKKLDFKVSSTSNNLISTIPSDNLAAGTDNTSSLGPPSMPVHYDSQLDTTLFGKKSSPLTESGGPLSLSEENNDSKLLESGLMNSQESSWGKNVSSTESGRLFKGKRAHGPALLTKDNALFKVSISLLKTNKTSNNSATNRKTHIDGPSLLIENSPSVWQNILESDTEFKKVTPLIHDRMLMDKNATALRLNHMSNKTTSSKNMEMVQQKKEGPIPPDAQNPDMSFFKMLFLPESARWIQRTHGKNSLNSGQGPSPKQLVSLGPEKSVEGQNFLSEKNKVVVGKGEFTKDVGLKEMVFPSSRNLFLTNLDNLHENNTHNQEKKIQEEIEKKETLIQENVVLPQIHTVTGTKNFMKNLFLLSTRQNVEGSYDGAYAPVLQDFRSLNDSTNRTKKHTAHFSKKGEEENLEGLGNQTKQIVEKYACTTRISPNTSQQNFVTQRSKRALKQFRLPLEETELEKRIIVDDTSTQWSKNMKHLTPSTLTQIDYNEKEKGAITQSPLSDCLTRSHSIPQANRSPLPIAKVSSFPSIRPIYLTRVLFQDNSSHLPAASYRKKDSGVQESSHFLQGAKKNNLSLAILTLEMTGDQREVGSLGTSATNSVTYKKVENTVLPKPDLPKTSGKVELLPKVHIYQKDLFPTETSNGSPGHLDLVEGSLLQGTEGAIKWNEANRPGKVPFLRVATESSAKTPSKLLDPLAWDNHYGTQIPKEEWKSQEKSPEKTAFKKKDTILSLNACESNHAIAAINEGQNKPEIEVTWAKQGRTERLCSQNPPVLKRHQREITRTTLQSDQEEIDYDDTISVEMKKEDFDIYDEDENQSPRSFQKKTRHYFIAAVERLWDYGMSSSPHVLRNRAQSGSVPQFKKVVFQEFTDGSFTQPLYRGELNEHLGLLGPYIRAEVEDNIMVTFRNQASRPYSFYSSLISYEEDQRQGAEPRKNFVKPNETKTYFWKVQHHMAPTKDEFDCKAWAYFSDVDLEKDVHSGLIGPLLVCHTNTLNPAHGRQVTVQEFALFFTIFDETKSWYFTENMERNCRAPCNIQMEDPTFKENYRFHAINGYIMDTLPGLVMAQDQRIRWYLLSMGSNENIHSIHFSGHVFTVRKKEEYKMALYNLYPGVFETVEMLPSKAGIWRVECLIGEHLHAGMSTLFLVYSNKCQTPLGMASGHIRDFQITASGQYGQWAPKLARLHYSGSINAWSTKEPFSWIKVDLLAPMIIHGIKTQGARQKFSSLYISQFIIMYSLDGKKWQTYRGNSTGTLMVFFGNVDSSGIKHNIFNPPIIARYIRLHPTHYSIRSTLRMELMGCDLNSCSMPLGMESKAISDAQITASSYFTNMFATWSPSKARLHLQGRSNAWRPQVNNPKEWLQVDFQKTMKVTGVTTQGVKSLLTSMYVKEFLISSSQDGHQWTLFFQNGKVKVFQGNQDSFTPVVNSLDPPLLTRYLRIHPQSWVHQIALRMEVLGCEAQDLY
+------------------------------
+HEME COORDINATION SITE CHECK:
+------------------------------
+NOTE : Heme coordination check PASS!
+Length of sequence: 2351
+Total number of potential coordination sites found:  180
+Number of potential CYS based sites: 26
+Number of potential HIS based sites: 75
+Number of potential TYR based sites: 79 
+
+NOTE : Successfully built 9mer motifs for all the  180 potential coordination sites !
+--------------------------------------------------
+ADJACENT BASIC AMINO ACID CHECK:
+-----------------------------------
+NOTE : Screening all potential motifs for adjacent basic amino acids
+NOTE : 124 out of the 180 9mers PASS the adjacent basic amino acids check
+NOTE : These 124 9mers will be used in the next step to check for positive net charge
+-----------------------------------
+NET CHARGE CHECK:
+-----------------------------------
+NOTE : Checking net charge on the individual 9mer motifs
+NOTE : An individual motif PASSES this check if its net charge is positive
+NOTE : An individual motif also PASSES this check if its net charge is NOT positive BUT it is a CYS BASED motif
+NOTE : 101 out of 124 PASS the net charge check!
+--------------------------------------------------
+ADDITIONAL COORDINATION SITE CHECK
+--------------------------------------------------
+NOTE : Checking the presence of additional coordination sites
+NOTE : Additional coordination site check: PASS
+NOTE : Proceeding to check spacer length between coordination sites
+--------------------------------------------------
+SPACER DISTANCE CHECK
+--------------------------------------------------
+NOTE : 79 out of 101 PASS the spacer check!
+NOTE : All checks done, preparing tabular summary
+**************************************************************************************************************
+TABULAR SUMMARY
+NOTE : Please use the available structure information to only consider those motifs that are "surface exposed"
+**************************************************************************************************************
++------+----------------------+------------+---------------+------------+
+| S.no | Coordinating residue | 9mer motif |   Net charge  | Spacer > 2 |
++------+----------------------+------------+---------------+------------+
+|  1   |         C12          | CFFLCLLRF  |       1       |    YES     |
+|  2   |         C17          | LLRFCFSAT  |       1       |    YES     |
+|  3   |         Y24          | ATRRYYLGA  |       2       |     NO     |
+|  4   |         Y25          | TRRYYLGAV  |       2       |     NO     |
+|  5   |         Y65          | TSVVYKKTL  |       2       |    YES     |
+|  6   |         Y124         | VGVSYWKAS  |       1       |    YES     |
+|  7   |         Y155         | GSHTYVWQV  |       1       |    YES     |
+|  8   |         Y177         | LTYSYLSHV  |       1       |    YES     |
+|  9   |         C198         | ALLVCREGS  |  0(CYS motif) |    YES     |
+|  10  |         H212         | TQTLHKFIL  |       2       |    YES     |
+|  11  |         H228         | GKSWHSETK  |       2       |    YES     |
+|  12  |         H251         | WPKMHTVNG  |       2       |    YES     |
+|  13  |         Y256         | TVNGYVNRS  |       1       |    YES     |
+|  14  |         C267         | GLIGCHRKS  |       3       |     NO     |
+|  15  |         H268         | LIGCHRKSV  |       3       |     NO     |
+|  16  |         Y273         | RKSVYWHVI  |       3       |    YES     |
+|  17  |         H300         | LVRNHRQAS  |       3       |    YES     |
+|  18  |         C329         | FLLFCHISS  |       1       |     NO     |
+|  19  |         H330         | LLFCHISSH  |       2       |     NO     |
+|  20  |         H334         | HISSHQHDG  |       2       |    YES     |
+|  21  |         C348         | KVDSCPEEP  | -2(CYS motif) |    YES     |
+|  22  |         H397         | VAKKHPKTW  |       4       |    YES     |
+|  23  |         H403         | KTWVHYIAA  |       2       |    YES     |
+|  24  |         Y430         | YKSQYLNNG  |       1       |    YES     |
+|  25  |         Y442         | IGRKYKKVR  |       5       |    YES     |
+|  26  |         Y492         | ASRPYNIYP  |       1       |    YES     |
+|  27  |         Y495         | PYNIYPHGI  |       1       |    YES     |
+|  28  |         Y506         | VRPLYSRRL  |       3       |    YES     |
+|  29  |         H516         | KGVKHLKDF  |       3       |    YES     |
+|  30  |         Y530         | EIFKYKWTV  |       1       |    YES     |
+|  31  |         C547         | SDPRCLTRY  |       1       |    YES     |
+|  32  |         Y551         | CLTRYYSSF  |       1       |     NO     |
+|  33  |         Y552         | LTRYYSSFV  |       1       |     NO     |
+|  34  |         C573         | PLLICYKES  |  0(CYS motif) |    YES     |
+|  35  |         C649         | QLSVCLHEV  |  0(CYS motif) |    YES     |
+|  36  |         Y675         | FFSGYTFKH  |       2       |    YES     |
+|  37  |         H679         | YTFKHKMVY  |       3       |    YES     |
+|  38  |         C711         | WILGCHNSD  |  0(CYS motif) |    YES     |
+|  39  |         C730         | KVSSCDKNT  |       1       |    YES     |
+|  40  |         H767         | QNSRHPSTR  |       3       |    YES     |
+|  41  |         H794         | PWFAHRTPM  |       2       |    YES     |
+|  42  |         H855         | SEMTHFRPQ  |       1       |    YES     |
+|  43  |         H861         | RPQLHHSGD  |       2       |     NO     |
+|  44  |         H862         | PQLHHSGDM  |       1       |     NO     |
+|  45  |         H998         | GKRAHGPAL  |       3       |    YES     |
+|  46  |        H1033         | NRKTHIDGP  |       2       |    YES     |
+|  47  |        H1066         | TPLIHDRML  |       1       |    YES     |
+|  48  |        H1082         | LRLNHMSNK  |       3       |    YES     |
+|  49  |        H1132         | IQRTHGKNS  |       3       |    YES     |
+|  50  |        H1283         | RTKKHTAHF  |       5       |    YES     |
+|  51  |        H1286         | KHTAHFSKK  |       5       |    YES     |
+|  52  |        C1312         | EKYACTTRI  |       1       |    YES     |
+|  53  |        H1365         | KNMKHLTPS  |       3       |    YES     |
+|  54  |        C1392         | PLSDCLTRS  |  0(CYS motif) |    YES     |
+|  55  |        H1397         | LTRSHSIPQ  |       2       |    YES     |
+|  56  |        Y1422         | IRPIYLTRV  |       2       |    YES     |
+|  57  |        Y1440         | PAASYRKKD  |       2       |    YES     |
+|  58  |        Y1491         | NSVTYKKVE  |       1       |    YES     |
+|  59  |        H1518         | LPKVHIYQK  |       3       |     NO     |
+|  60  |        Y1520         | KVHIYQKDL  |       2       |     NO     |
+|  61  |        C1623         | SLNACESNH  |  0(CYS motif) |    YES     |
+|  62  |        C1655         | TERLCSQNP  |  0(CYS motif) |    YES     |
+|  63  |        H1665         | VLKRHQREI  |       3       |    YES     |
+|  64  |        H1716         | KKTRHYFIA  |       4       |     NO     |
+|  65  |        Y1717         | KTRHYFIAA  |       3       |     NO     |
+|  66  |        H1735         | SSSPHVLRN  |       2       |    YES     |
+|  67  |        Y1802         | ASRPYSFYS  |       1       |    YES     |
+|  68  |        Y1834         | ETKTYFWKV  |       1       |    YES     |
+|  69  |        H1840         | WKVQHHMAP  |       3       |     NO     |
+|  70  |        H1841         | KVQHHMAPT  |       3       |     NO     |
+|  71  |        C1851         | DEFDCKAWA  | -2(CYS motif) |    YES     |
+|  72  |        C1877         | PLLVCHTNT  |       1       |    YES     |
+|  73  |        H1886         | LNPAHGRQV  |       2       |    YES     |
+|  74  |        C1918         | MERNCRAPC  |       1       |    YES     |
+|  75  |        C1922         | CRAPCNIQM  |       1       |    YES     |
+|  76  |        Y1935         | FKENYRFHA  |       2       |    YES     |
+|  77  |        H1938         | NYRFHAING  |       2       |    YES     |
+|  78  |        Y1962         | RIRWYLLSM  |       2       |    YES     |
+|  79  |        H1973         | NENIHSIHF  |       1       |    YES     |
+|  80  |        H1976         | IHSIHFSGH  |       3       |    YES     |
+|  81  |        H1980         | HFSGHVFTV  |       2       |    YES     |
+|  82  |        Y1990         | KKEEYKMAL  |       1       |    YES     |
+|  83  |        Y1995         | KMALYNLYP  |       1       |    YES     |
+|  84  |        C2019         | WRVECLIGE  | -1(CYS motif) |    YES     |
+|  85  |        H2024         | LIGEHLHAG  |       1       |     NO     |
+|  86  |        H2026         | GEHLHAGMS  |       1       |     NO     |
+|  87  |        Y2036         | LFLVYSNKC  |       1       |    YES     |
+|  88  |        C2040         | YSNKCQTPL  |       1       |    YES     |
+|  89  |        H2050         | MASGHIRDF  |       1       |    YES     |
+|  90  |        H2073         | LARLHYSGS  |       2       |     NO     |
+|  91  |        Y2074         | ARLHYSGSI  |       2       |     NO     |
+|  92  |        H2101         | PMIIHGIKT  |       2       |    YES     |
+|  93  |        Y2134         | KWQTYRGNS  |       2       |    YES     |
+|  94  |        H2156         | SGIKHNIFN  |       2       |    YES     |
+|  95  |        Y2167         | IIARYIRLH  |       3       |    YES     |
+|  96  |        H2171         | YIRLHPTHY  |       3       |    YES     |
+|  97  |        H2174         | LHPTHYSIR  |       3       |     NO     |
+|  98  |        Y2175         | HPTHYSIRS  |       3       |     NO     |
+|  99  |        H2230         | KARLHLQGR  |       4       |    YES     |
+| 100  |        Y2324         | LLTRYLRIH  |       3       |    YES     |
+| 101  |        H2328         | YLRIHPQSW  |       2       |    YES     |
++------+----------------------+------------+---------------+------------+
+101 101 101
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+WORKING ON THE VALID SEQUENCE 2 . sp|P02452|CO1A1_HUMAN Collagen alpha-1(I) chain OS=Homo sapiens OX=9606 GN=COL1A1 PE=1 SV=5
+--------------------------------------------------------------------------------
+MFSFVDLRLLLLLAATALLTHGQEEGQVEGQDEDIPPITCVQNGLRYHDRDVWKPEPCRICVCDNGKVLCDDVICDETKNCPGAEVPEGECCPVCPDGSESPTDQETTGVEGPKGDTGPRGPRGPAGPPGRDGIPGQPGLPGPPGPPGPPGPPGLGGNFAPQLSYGYDEKSTGGISVPGPMGPSGPRGLPGPPGAPGPQGFQGPPGEPGEPGASGPMGPRGPPGPPGKNGDDGEAGKPGRPGERGPPGPQGARGLPGTAGLPGMKGHRGFSGLDGAKGDAGPAGPKGEPGSPGENGAPGQMGPRGLPGERGRPGAPGPAGARGNDGATGAAGPPGPTGPAGPPGFPGAVGAKGEAGPQGPRGSEGPQGVRGEPGPPGPAGAAGPAGNPGADGQPGAKGANGAPGIAGAPGFPGARGPSGPQGPGGPPGPKGNSGEPGAPGSKGDTGAKGEPGPVGVQGPPGPAGEEGKRGARGEPGPTGLPGPPGERGGPGSRGFPGADGVAGPKGPAGERGSPGPAGPKGSPGEAGRPGEAGLPGAKGLTGSPGSPGPDGKTGPPGPAGQDGRPGPPGPPGARGQAGVMGFPGPKGAAGEPGKAGERGVPGPPGAVGPAGKDGEAGAQGPPGPAGPAGERGEQGPAGSPGFQGLPGPAGPPGEAGKPGEQGVPGDLGAPGPSGARGERGFPGERGVQGPPGPAGPRGANGAPGNDGAKGDAGAPGAPGSQGAPGLQGMPGERGAAGLPGPKGDRGDAGPKGADGSPGKDGVRGLTGPIGPPGPAGAPGDKGESGPSGPAGPTGARGAPGDRGEPGPPGPAGFAGPPGADGQPGAKGEPGDAGAKGDAGPPGPAGPAGPPGPIGNVGAPGAKGARGSAGPPGATGFPGAAGRVGPPGPSGNAGPPGPPGPAGKEGGKGPRGETGPAGRPGEVGPPGPPGPAGEKGSPGADGPAGAPGTPGPQGIAGQRGVVGLPGQRGERGFPGLPGPSGEPGKQGPSGASGERGPPGPMGPPGLAGPPGESGREGAPGAEGSPGRDGSPGAKGDRGETGPAGPPGAPGAPGAPGPVGPAGKSGDRGETGPAGPTGPVGPVGARGPAGPQGPRGDKGETGEQGDRGIKGHRGFSGLQGPPGPPGSPGEQGPSGASGPAGPRGPPGSAGAPGKDGLNGLPGPIGPPGPRGRTGDAGPVGPPGPPGPPGPPGPPSAGFDFSFLPQPPQEKAHDGGRYYRADDANVVRDRDLEVDTTLKSLSQQIENIRSPEGSRKNPARTCRDLKMCHSDWKSGEYWIDPNQGCNLDAIKVFCNMETGETCVYPTQPSVAQKNWYISKNPKDKRHVWFGESMTDGFQFEYGGQGSDPADVAIQLTFLRLMSTEASQNITYHCKNSVAYMDQQTGNLKKALLLQGSNEIEIRAEGNSRFTYSVTVDGCTSHTGAWGKTVIEYKTTKTSRLPIIDVAPLDVGAPDQEFGFDVGPVCFL
+------------------------------
+HEME COORDINATION SITE CHECK:
+------------------------------
+NOTE : Heme coordination check PASS!
+Length of sequence: 1464
+Total number of potential coordination sites found:  40
+Number of potential CYS based sites: 18
+Number of potential HIS based sites: 9
+Number of potential TYR based sites: 13 
+
+NOTE : Successfully built 9mer motifs for all the  40 potential coordination sites !
+--------------------------------------------------
+ADJACENT BASIC AMINO ACID CHECK:
+-----------------------------------
+NOTE : Screening all potential motifs for adjacent basic amino acids
+NOTE : 27 out of the 40 9mers PASS the adjacent basic amino acids check
+NOTE : These 27 9mers will be used in the next step to check for positive net charge
+-----------------------------------
+NET CHARGE CHECK:
+-----------------------------------
+NOTE : Checking net charge on the individual 9mer motifs
+NOTE : An individual motif PASSES this check if its net charge is positive
+NOTE : An individual motif also PASSES this check if its net charge is NOT positive BUT it is a CYS BASED motif
+NOTE : 23 out of 27 PASS the net charge check!
+--------------------------------------------------
+ADDITIONAL COORDINATION SITE CHECK
+--------------------------------------------------
+NOTE : Checking the presence of additional coordination sites
+NOTE : Additional coordination site check: PASS
+NOTE : Proceeding to check spacer length between coordination sites
+--------------------------------------------------
+SPACER DISTANCE CHECK
+--------------------------------------------------
+NOTE : 14 out of 23 PASS the spacer check!
+NOTE : All checks done, preparing tabular summary
+**************************************************************************************************************
+TABULAR SUMMARY
+NOTE : Please use the available structure information to only consider those motifs that are "surface exposed"
+**************************************************************************************************************
++------+----------------------+------------+---------------+------------+
+| S.no | Coordinating residue | 9mer motif |   Net charge  | Spacer > 2 |
++------+----------------------+------------+---------------+------------+
+|  1   |         Y47          | NGLRYHDRD  |       1       |     NO     |
+|  2   |         H48          | GLRYHDRDV  |       1       |     NO     |
+|  3   |         C58          | KPEPCRICV  |       1       |    YES     |
+|  4   |         C61          | PCRICVCDN  |  0(CYS motif) |     NO     |
+|  5   |         C63          | RICVCDNGK  |       1       |     NO     |
+|  6   |         C70          | GKVLCDDVI  | -1(CYS motif) |    YES     |
+|  7   |         C75          | DDVICDETK  | -3(CYS motif) |    YES     |
+|  8   |         C81          | ETKNCPGAE  | -1(CYS motif) |    YES     |
+|  9   |         H267         | GMKGHRGFS  |       3       |    YES     |
+|  10  |        H1110         | GIKGHRGFS  |       3       |    YES     |
+|  11  |        H1210         | QEKAHDGGR  |       1       |    YES     |
+|  12  |        C1259         | PARTCRDLK  |       2       |    YES     |
+|  13  |        C1265         | DLKMCHSDW  |  0(CYS motif) |     NO     |
+|  14  |        H1266         | LKMCHSDWK  |       2       |     NO     |
+|  15  |        C1291         | IKVFCNMET  |  0(CYS motif) |    YES     |
+|  16  |        Y1313         | QKNWYISKN  |       2       |    YES     |
+|  17  |        H1323         | KDKRHVWFG  |       3       |    YES     |
+|  18  |        Y1368         | QNITYHCKN  |       2       |     NO     |
+|  19  |        H1369         | NITYHCKNS  |       2       |     NO     |
+|  20  |        C1370         | ITYHCKNSV  |       2       |     NO     |
+|  21  |        Y1408         | SRFTYSVTV  |       1       |    YES     |
+|  22  |        C1415         | TVDGCTSHT  |  0(CYS motif) |    YES     |
+|  23  |        Y1429         | TVIEYKTTK  |       1       |    YES     |
++------+----------------------+------------+---------------+------------+
+23 23 23
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+WORKING ON THE VALID SEQUENCE 3 . sp|P04070|PROC_HUMAN Vitamin K-dependent protein C OS=Homo sapiens OX=9606 GN=PROC PE=1 SV=1
+--------------------------------------------------------------------------------
+MWQLTSLLLFVATWGISGTPAPLDSVFSSSERAHQVLRIRKRANSFLEELRHSSLERECIEEICDFEEAKEIFQNVDDTLAFWSKHVDGDQCLVLPLEHPCASLCCGHGTCIDGIGSFSCDCRSGWEGRFCQREVSFLNCSLDNGGCTHYCLEEVGWRRCSCAPGYKLGDDLLQCHPAVKFPCGRPWKRMEKKRSHLKRDTEDQEDQVDPRLIDGKMTRRGDSPWQVVLLDSKKKLACGAVLIHPSWVLTAAHCMDESKKLLVRLGEYDLRRWEKWELDLDIKEVFVHPNYSKSTTDNDIALLHLAQPATLSQTIVPICLPDSGLAERELNQAGQETLVTGWGYHSSREKEAKRNRTFVLNFIKIPVVPHNECSEVMSNMVSENMLCAGILGDRQDACEGDSGGPMVASFHGTWFLVGLVSWGEGCGLLHNYGVYTKVSRYLDWIHGHIRDKEAPQKSWAP
+------------------------------
+HEME COORDINATION SITE CHECK:
+------------------------------
+NOTE : Heme coordination check PASS!
+Length of sequence: 461
+Total number of potential coordination sites found:  50
+Number of potential CYS based sites: 24
+Number of potential HIS based sites: 18
+Number of potential TYR based sites: 8 
+
+NOTE : Successfully built 9mer motifs for all the  50 potential coordination sites !
+--------------------------------------------------
+ADJACENT BASIC AMINO ACID CHECK:
+-----------------------------------
+NOTE : Screening all potential motifs for adjacent basic amino acids
+NOTE : 35 out of the 50 9mers PASS the adjacent basic amino acids check
+NOTE : These 35 9mers will be used in the next step to check for positive net charge
+-----------------------------------
+NET CHARGE CHECK:
+-----------------------------------
+NOTE : Checking net charge on the individual 9mer motifs
+NOTE : An individual motif PASSES this check if its net charge is positive
+NOTE : An individual motif also PASSES this check if its net charge is NOT positive BUT it is a CYS BASED motif
+NOTE : 31 out of 35 PASS the net charge check!
+--------------------------------------------------
+ADDITIONAL COORDINATION SITE CHECK
+--------------------------------------------------
+NOTE : Checking the presence of additional coordination sites
+NOTE : Additional coordination site check: PASS
+NOTE : Proceeding to check spacer length between coordination sites
+--------------------------------------------------
+SPACER DISTANCE CHECK
+--------------------------------------------------
+NOTE : 19 out of 31 PASS the spacer check!
+NOTE : All checks done, preparing tabular summary
+**************************************************************************************************************
+TABULAR SUMMARY
+NOTE : Please use the available structure information to only consider those motifs that are "surface exposed"
+**************************************************************************************************************
++------+----------------------+------------+---------------+------------+
+| S.no | Coordinating residue | 9mer motif |   Net charge  | Spacer > 2 |
++------+----------------------+------------+---------------+------------+
+|  1   |         H34          | SERAHQVLR  |       2       |    YES     |
+|  2   |         C59          | LERECIEEI  | -3(CYS motif) |    YES     |
+|  3   |         C101         | LEHPCASLC  |  0(CYS motif) |    YES     |
+|  4   |         C105         | CASLCCGHG  |       1       |     NO     |
+|  5   |         C106         | ASLCCGHGT  |       1       |     NO     |
+|  6   |         C111         | GHGTCIDGI  |  0(CYS motif) |    YES     |
+|  7   |         C120         | GSFSCDCRS  |  0(CYS motif) |     NO     |
+|  8   |         C122         | FSCDCRSGW  |  0(CYS motif) |     NO     |
+|  9   |         C131         | EGRFCQREV  |  0(CYS motif) |    YES     |
+|  10  |         C147         | DNGGCTHYC  |  0(CYS motif) |    YES     |
+|  11  |         C151         | CTHYCLEEV  | -1(CYS motif) |    YES     |
+|  12  |         C160         | GWRRCSCAP  |       2       |     NO     |
+|  13  |         C162         | RRCSCAPGY  |       2       |     NO     |
+|  14  |         C175         | DLLQCHPAV  |  0(CYS motif) |     NO     |
+|  15  |         H176         | LLQCHPAVK  |       2       |     NO     |
+|  16  |         C183         | VKFPCGRPW  |       2       |    YES     |
+|  17  |         H196         | KKRSHLKRD  |       5       |    YES     |
+|  18  |         C238         | KKLACGAVL  |       2       |    YES     |
+|  19  |         C254         | TAAHCMDES  | -1(CYS motif) |    YES     |
+|  20  |         Y268         | RLGEYDLRR  |       1       |    YES     |
+|  21  |         Y291         | VHPNYSKST  |       2       |    YES     |
+|  22  |         Y344         | TGWGYHSSR  |       2       |     NO     |
+|  23  |         H345         | GWGYHSSRE  |       1       |     NO     |
+|  24  |         C373         | PHNECSEVM  | -1(CYS motif) |    YES     |
+|  25  |         C398         | RQDACEGDS  | -2(CYS motif) |    YES     |
+|  26  |         C426         | WGEGCGLLH  |  0(CYS motif) |    YES     |
+|  27  |         Y432         | LLHNYGVYT  |       1       |    YES     |
+|  28  |         Y435         | NYGVYTKVS  |       1       |    YES     |
+|  29  |         Y441         | KVSRYLDWI  |       1       |    YES     |
+|  30  |         H446         | LDWIHGHIR  |       2       |     NO     |
+|  31  |         H448         | WIHGHIRDK  |       3       |     NO     |
++------+----------------------+------------+---------------+------------+
+31 31 31
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+WORKING ON THE VALID SEQUENCE 4 . sp|P04275|VWF_HUMAN von Willebrand factor OS=Homo sapiens OX=9606 GN=VWF PE=1 SV=4
+--------------------------------------------------------------------------------
+MIPARFAGVLLALALILPGTLCAEGTRGRSSTARCSLFGSDFVNTFDGSMYSFAGYCSYLLAGGCQKRSFSIIGDFQNGKRVSLSVYLGEFFDIHLFVNGTVTQGDQRVSMPYASKGLYLETEAGYYKLSGEAYGFVARIDGSGNFQVLLSDRYFNKTCGLCGNFNIFAEDDFMTQEGTLTSDPYDFANSWALSSGEQWCERASPPSSSCNISSGEMQKGLWEQCQLLKSTSVFARCHPLVDPEPFVALCEKTLCECAGGLECACPALLEYARTCAQEGMVLYGWTDHSACSPVCPAGMEYRQCVSPCARTCQSLHINEMCQERCVDGCSCPEGQLLDEGLCVESTECPCVHSGKRYPPGTSLSRDCNTCICRNSQWICSNEECPGECLVTGQSHFKSFDNRYFTFSGICQYLLARDCQDHSFSIVIETVQCADDRDAVCTRSVTVRLPGLHNSLVKLKHGAGVAMDGQDVQLPLLKGDLRIQHTVTASVRLSYGEDLQMDWDGRGRLLVKLSPVYAGKTCGLCGNYNGNQGDDFLTPSGLAEPRVEDFGNAWKLHGDCQDLQKQHSDPCALNPRMTRFSEEACAVLTSPTFEACHRAVSPLPYLRNCRYDVCSCSDGRECLCGALASYAAACAGRGVRVAWREPGRCELNCPKGQVYLQCGTPCNLTCRSLSYPDEECNEACLEGCFCPPGLYMDERGDCVPKAQCPCYYDGEIFQPEDIFSDHHTMCYCEDGFMHCTMSGVPGSLLPDAVLSSPLSHRSKRSLSCRPPMVKLVCPADNLRAEGLECTKTCQNYDLECMSMGCVSGCLCPPGMVRHENRCVALERCPCFHQGKEYAPGETVKIGCNTCVCQDRKWNCTDHVCDATCSTIGMAHYLTFDGLKYLFPGECQYVLVQDYCGSNPGTFRILVGNKGCSHPSVKCKKRVTILVEGGEIELFDGEVNVKRPMKDETHFEVVESGRYIILLLGKALSVVWDRHLSISVVLKQTYQEKVCGLCGNFDGIQNNDLTSSNLQVEEDPVDFGNSWKVSSQCADTRKVPLDSSPATCHNNIMKQTMVDSSCRILTSDVFQDCNKLVDPEPYLDVCIYDTCSCESIGDCACFCDTIAAYAHVCAQHGKVVTWRTATLCPQSCEERNLRENGYECEWRYNSCAPACQVTCQHPEPLACPVQCVEGCHAHCPPGKILDELLQTCVDPEDCPVCEVAGRRFASGKKVTLNPSDPEHCQICHCDVVNLTCEACQEPGGLVVPPTDAPVSPTTLYVEDISEPPLHDFYCSRLLDLVFLLDGSSRLSEAEFEVLKAFVVDMMERLRISQKWVRVAVVEYHDGSHAYIGLKDRKRPSELRRIASQVKYAGSQVASTSEVLKYTLFQIFSKIDRPEASRITLLLMASQEPQRMSRNFVRYVQGLKKKKVIVIPVGIGPHANLKQIRLIEKQAPENKAFVLSSVDELEQQRDEIVSYLCDLAPEAPPPTLPPDMAQVTVGPGLLGVSTLGPKRNSMVLDVAFVLEGSDKIGEADFNRSKEFMEEVIQRMDVGQDSIHVTVLQYSYMVTVEYPFSEAQSKGDILQRVREIRYQGGNRTNTGLALRYLSDHSFLVSQGDREQAPNLVYMVTGNPASDEIKRLPGDIQVVPIGVGPNANVQELERIGWPNAPILIQDFETLPREAPDLVLQRCCSGEGLQIPTLSPAPDCSQPLDVILLLDGSSSFPASYFDEMKSFAKAFISKANIGPRLTQVSVLQYGSITTIDVPWNVVPEKAHLLSLVDVMQREGGPSQIGDALGFAVRYLTSEMHGARPGASKAVVILVTDVSVDSVDAAADAARSNRVTVFPIGIGDRYDAAQLRILAGPAGDSNVVKLQRIEDLPTMVTLGNSFLHKLCSGFVRICMDEDGNEKRPGDVWTLPDQCHTVTCQPDGQTLLKSHRVNCDRGLRPSCPNSQSPVKVEETCGCRWTCPCVCTGSSTRHIVTFDGQNFKLTGSCSYVLFQNKEQDLEVILHNGACSPGARQGCMKSIEVKHSALSVELHSDMEVTVNGRLVSVPYVGGNMEVNVYGAIMHEVRFNHLGHIFTFTPQNNEFQLQLSPKTFASKTYGLCGICDENGANDFMLRDGTVTTDWKTLVQEWTVQRPGQTCQPILEEQCLVPDSSHCQVLLLPLFAECHKVLAPATFYAICQQDSCHQEQVCEVIASYAHLCRTNGVCVDWRTPDFCAMSCPPSLVYNHCEHGCPRHCDGNVSSCGDHPSEGCFCPPDKVMLEGSCVPEEACTQCIGEDGVQHQFLEAWVPDHQPCQICTCLSGRKVNCTTQPCPTAKAPTCGLCEVARLRQNADQCCPEYECVCDPVSCDLPPVPHCERGLQPTLTNPGECRPNFTCACRKEECKRVSPPSCPPHRLPTLRKTQCCDEYECACNCVNSTVSCPLGYLASTATNDCGCTTTTCLPDKVCVHRSTIYPVGQFWEEGCDVCTCTDMEDAVMGLRVAQCSQKPCEDSCRSGFTYVLHEGECCGRCLPSACEVVTGSPRGDSQSSWKSVGSQWASPENPCLINECVRVKEEVFIQQRNVSCPQLEVPVCPSGFQLSCKTSACCPSCRCERMEACMLNGTVIGPGKTVMIDVCTTCRCMVQVGVISGFKLECRKTTCNPCPLGYKEENNTGECCGRCLPTACTIQLRGGQIMTLKRDETLQDGCDTHFCKVNERGEYFWEKRVTGCPPFDEHKCLAEGGKIMKIPGTCCDTCEEPECNDITARLQYVKVGSCKSEVEVDIHYCQGKCASKAMYSIDINDVQDQCSCCSPTRTEPMQVALHCTNGSVVYHEVLNAMECKCSPRKCSK
+------------------------------
+HEME COORDINATION SITE CHECK:
+------------------------------
+NOTE : Heme coordination check PASS!
+Length of sequence: 2813
+Total number of potential coordination sites found:  381
+Number of potential CYS based sites: 234
+Number of potential HIS based sites: 69
+Number of potential TYR based sites: 78 
+
+NOTE : Successfully built 9mer motifs for all the  381 potential coordination sites !
+--------------------------------------------------
+ADJACENT BASIC AMINO ACID CHECK:
+-----------------------------------
+NOTE : Screening all potential motifs for adjacent basic amino acids
+NOTE : 230 out of the 381 9mers PASS the adjacent basic amino acids check
+NOTE : These 230 9mers will be used in the next step to check for positive net charge
+-----------------------------------
+NET CHARGE CHECK:
+-----------------------------------
+NOTE : Checking net charge on the individual 9mer motifs
+NOTE : An individual motif PASSES this check if its net charge is positive
+NOTE : An individual motif also PASSES this check if its net charge is NOT positive BUT it is a CYS BASED motif
+NOTE : 201 out of 230 PASS the net charge check!
+--------------------------------------------------
+ADDITIONAL COORDINATION SITE CHECK
+--------------------------------------------------
+NOTE : Checking the presence of additional coordination sites
+NOTE : Additional coordination site check: PASS
+NOTE : Proceeding to check spacer length between coordination sites
+--------------------------------------------------
+SPACER DISTANCE CHECK
+--------------------------------------------------
+NOTE : 130 out of 201 PASS the spacer check!
+NOTE : All checks done, preparing tabular summary
+**************************************************************************************************************
+TABULAR SUMMARY
+NOTE : Please use the available structure information to only consider those motifs that are "surface exposed"
+**************************************************************************************************************
++------+----------------------+------------+---------------+------------+
+| S.no | Coordinating residue | 9mer motif |   Net charge  | Spacer > 2 |
++------+----------------------+------------+---------------+------------+
+|  1   |         C35          | STARCSLFG  |       1       |    YES     |
+|  2   |         C65          | LAGGCQKRS  |       2       |    YES     |
+|  3   |         Y113         | VSMPYASKG  |       1       |    YES     |
+|  4   |         Y154         | LSDRYFNKT  |       1       |    YES     |
+|  5   |         C159         | FNKTCGLCG  |       1       |    YES     |
+|  6   |         C200         | GEQWCERAS  | -1(CYS motif) |    YES     |
+|  7   |         C225         | LWEQCQLLK  |  0(CYS motif) |    YES     |
+|  8   |         C237         | VFARCHPLV  |       2       |     NO     |
+|  9   |         H238         | FARCHPLVD  |       1       |     NO     |
+|  10  |         C250         | FVALCEKTL  |  0(CYS motif) |    YES     |
+|  11  |         C255         | EKTLCECAG  | -1(CYS motif) |    YES     |
+|  12  |         C275         | YARTCAQEG  |  0(CYS motif) |    YES     |
+|  13  |         C291         | DHSACSPVC  |  0(CYS motif) |    YES     |
+|  14  |         C304         | EYRQCVSPC  |  0(CYS motif) |    YES     |
+|  15  |         C308         | CVSPCARTC  |       1       |    YES     |
+|  16  |         C312         | CARTCQSLH  |       2       |    YES     |
+|  17  |         C321         | INEMCQERC  | -1(CYS motif) |    YES     |
+|  18  |         C325         | CQERCVDGC  | -1(CYS motif) |    YES     |
+|  19  |         C348         | ESTECPCVH  | -1(CYS motif) |     NO     |
+|  20  |         C350         | TECPCVHSG  |  0(CYS motif) |     NO     |
+|  21  |         H352         | CPCVHSGKR  |       3       |     NO     |
+|  22  |         Y357         | SGKRYPPGT  |       2       |    YES     |
+|  23  |         C367         | LSRDCNTCI  |  0(CYS motif) |    YES     |
+|  24  |         C370         | DCNTCICRN  |  0(CYS motif) |     NO     |
+|  25  |         C372         | NTCICRNSQ  |       1       |     NO     |
+|  26  |         H395         | TGQSHFKSF  |       2       |    YES     |
+|  27  |         Y412         | GICQYLLAR  |       1       |    YES     |
+|  28  |         C418         | LARDCQDHS  |  0(CYS motif) |    YES     |
+|  29  |         C432         | ETVQCADDR  | -2(CYS motif) |    YES     |
+|  30  |         C440         | RDAVCTRSV  |       1       |    YES     |
+|  31  |         H460         | VKLKHGAGV  |       3       |    YES     |
+|  32  |         H484         | LRIQHTVTA  |       2       |    YES     |
+|  33  |         Y516         | LSPVYAGKT  |       1       |    YES     |
+|  34  |         C521         | AGKTCGLCG  |       1       |    YES     |
+|  35  |         H556         | AWKLHGDCQ  |       1       |    YES     |
+|  36  |         C559         | LHGDCQDLQ  | -1(CYS motif) |    YES     |
+|  37  |         H566         | LQKQHSDPC  |       1       |    YES     |
+|  38  |         C570         | HSDPCALNP  |  0(CYS motif) |    YES     |
+|  39  |         C595         | TFEACHRAV  |       1       |     NO     |
+|  40  |         H596         | FEACHRAVS  |       1       |     NO     |
+|  41  |         Y604         | SPLPYLRNC  |       1       |    YES     |
+|  42  |         C608         | YLRNCRYDV  |       1       |     NO     |
+|  43  |         Y610         | RNCRYDVCS  |       1       |     NO     |
+|  44  |         C613         | RYDVCSCSD  | -1(CYS motif) |     NO     |
+|  45  |         C615         | DVCSCSDGR  | -1(CYS motif) |     NO     |
+|  46  |         C621         | DGRECLCGA  | -1(CYS motif) |     NO     |
+|  47  |         C623         | RECLCGALA  |  0(CYS motif) |     NO     |
+|  48  |         C633         | YAAACAGRG  |       1       |    YES     |
+|  49  |         C648         | EPGRCELNC  | -1(CYS motif) |    YES     |
+|  50  |         C652         | CELNCPKGQ  |  0(CYS motif) |    YES     |
+|  51  |         Y658         | KGQVYLQCG  |       1       |    YES     |
+|  52  |         C669         | CNLTCRSLS  |       1       |    YES     |
+|  53  |         C701         | ERGDCVPKA  |  0(CYS motif) |    YES     |
+|  54  |         C707         | PKAQCPCYY  |       1       |    YES     |
+|  55  |         H725         | IFSDHHTMC  |       1       |     NO     |
+|  56  |         H726         | FSDHHTMCY  |       1       |     NO     |
+|  57  |         C729         | HHTMCYCED  |  0(CYS motif) |    YES     |
+|  58  |         C738         | GFMHCTMSG  |       1       |    YES     |
+|  59  |         H759         | SPLSHRSKR  |       4       |    YES     |
+|  60  |         C767         | RSLSCRPPM  |       2       |    YES     |
+|  61  |         C776         | VKLVCPADN  |  0(CYS motif) |    YES     |
+|  62  |         C788         | EGLECTKTC  | -1(CYS motif) |    YES     |
+|  63  |         C792         | CTKTCQNYD  |  0(CYS motif) |    YES     |
+|  64  |         H817         | GMVRHENRC  |       2       |    YES     |
+|  65  |         C821         | HENRCVALE  |  0(CYS motif) |    YES     |
+|  66  |         C827         | ALERCPCFH  |       1       |     NO     |
+|  67  |         C829         | ERCPCFHQG  |       1       |     NO     |
+|  68  |         H831         | CPCFHQGKE  |       1       |     NO     |
+|  69  |         C846         | VKIGCNTCV  |       1       |    YES     |
+|  70  |         C851         | NTCVCQDRK  |       1       |    YES     |
+|  71  |         C858         | RKWNCTDHV  |       2       |    YES     |
+|  72  |         C863         | TDHVCDATC  | -1(CYS motif) |    YES     |
+|  73  |         C914         | GNKGCSHPS  |       2       |     NO     |
+|  74  |         H916         | KGCSHPSVK  |       3       |     NO     |
+|  75  |         C921         | PSVKCKKRV  |       4       |    YES     |
+|  76  |         H977         | VWDRHLSIS  |       1       |    YES     |
+|  77  |         Y988         | LKQTYQEKV  |       1       |    YES     |
+|  78  |         C993         | QEKVCGLCG  |  0(CYS motif) |    YES     |
+|  79  |        C1031         | VSSQCADTR  |  0(CYS motif) |    YES     |
+|  80  |        C1046         | SPATCHNNI  |       1       |    YES     |
+|  81  |        C1060         | VDSSCRILT  |  0(CYS motif) |    YES     |
+|  82  |        C1071         | VFQDCNKLV  |  0(CYS motif) |    YES     |
+|  83  |        Y1107         | TIAAYAHVC  |       1       |    YES     |
+|  84  |        C1111         | YAHVCAQHG  |       2       |    YES     |
+|  85  |        H1114         | VCAQHGKVV  |       2       |    YES     |
+|  86  |        C1130         | CPQSCEERN  | -1(CYS motif) |    YES     |
+|  87  |        C1142         | NGYECEWRY  | -1(CYS motif) |    YES     |
+|  88  |        C1149         | RYNSCAPAC  |       1       |    YES     |
+|  89  |        C1157         | CQVTCQHPE  |  0(CYS motif) |    YES     |
+|  90  |        C1173         | CVEGCHAHC  |       1       |     NO     |
+|  91  |        H1174         | VEGCHAHCP  |       1       |     NO     |
+|  92  |        H1176         | GCHAHCPPG  |       2       |     NO     |
+|  93  |        C1177         | CHAHCPPGK  |       3       |     NO     |
+|  94  |        C1222         | DPEHCQICH  |  0(CYS motif) |    YES     |
+|  95  |        C1225         | HCQICHCDV  |       1       |     NO     |
+|  96  |        C1227         | QICHCDVVN  |  0(CYS motif) |     NO     |
+|  97  |        Y1271         | LHDFYCSRL  |       1       |     NO     |
+|  98  |        C1272         | HDFYCSRLL  |       1       |     NO     |
+|  99  |        H1326         | HDGSHAYIG  |       1       |     NO     |
+| 100  |        Y1328         | GSHAYIGLK  |       2       |     NO     |
+| 101  |        Y1349         | SQVKYAGSQ  |       1       |    YES     |
+| 102  |        Y1400         | NFVRYVQGL  |       1       |    YES     |
+| 103  |        H1419         | GIGPHANLK  |       2       |    YES     |
+| 104  |        Y1570         | REIRYQGGN  |       1       |    YES     |
+| 105  |        Y1584         | LALRYLSDH  |       1       |    YES     |
+| 106  |        C1669         | VLQRCCSGE  |  0(CYS motif) |     NO     |
+| 107  |        C1670         | LQRCCSGEG  |  0(CYS motif) |     NO     |
+| 108  |        H1753         | PEKAHLLSL  |       1       |    YES     |
+| 109  |        H1786         | TSEMHGARP  |       1       |    YES     |
+| 110  |        H1869         | NSFLHKLCS  |       2       |    YES     |
+| 111  |        C1872         | LHKLCSGFV  |       2       |    YES     |
+| 112  |        C1879         | FVRICMDED  | -2(CYS motif) |    YES     |
+| 113  |        C1899         | LPDQCHTVT  |  0(CYS motif) |    YES     |
+| 114  |        C1904         | HTVTCQPDG  |  0(CYS motif) |    YES     |
+| 115  |        H1915         | LLKSHRVNC  |       3       |    YES     |
+| 116  |        C1919         | HRVNCDRGL  |       2       |    YES     |
+| 117  |        C1927         | LRPSCPNSQ  |       1       |    YES     |
+| 118  |        C1940         | VEETCGCRW  | -1(CYS motif) |     NO     |
+| 119  |        C1942         | ETCGCRWTC  |  0(CYS motif) |     NO     |
+| 120  |        C1946         | CRWTCPCVC  |       1       |    YES     |
+| 121  |        H1957         | SSTRHIVTF  |       2       |    YES     |
+| 122  |        C1993         | HNGACSPGA  |       1       |    YES     |
+| 123  |        C2001         | ARQGCMKSI  |       2       |    YES     |
+| 124  |        H2009         | IEVKHSALS  |       1       |    YES     |
+| 125  |        H2048         | GAIMHEVRF  |       1       |    YES     |
+| 126  |        H2054         | VRFNHLGHI  |       3       |    YES     |
+| 127  |        H2057         | NHLGHIFTF  |       2       |    YES     |
+| 128  |        Y2082         | ASKTYGLCG  |       1       |    YES     |
+| 129  |        C2139         | DSSHCQVLL  |  0(CYS motif) |    YES     |
+| 130  |        C2150         | LFAECHKVL  |       1       |     NO     |
+| 131  |        H2151         | FAECHKVLA  |       1       |     NO     |
+| 132  |        C2168         | QQDSCHQEQ  | -1(CYS motif) |    YES     |
+| 133  |        Y2180         | VIASYAHLC  |       1       |     NO     |
+| 134  |        H2182         | ASYAHLCRT  |       2       |     NO     |
+| 135  |        C2184         | YAHLCRTNG  |       2       |     NO     |
+| 136  |        C2190         | TNGVCVDWR  |  0(CYS motif) |    YES     |
+| 137  |        H2211         | LVYNHCEHG  |       1       |     NO     |
+| 138  |        C2212         | VYNHCEHGC  |       1       |     NO     |
+| 139  |        H2214         | NHCEHGCPR  |       2       |     NO     |
+| 140  |        C2216         | CEHGCPRHC  |       2       |     NO     |
+| 141  |        H2219         | GCPRHCDGN  |       1       |     NO     |
+| 142  |        C2220         | CPRHCDGNV  |       1       |     NO     |
+| 143  |        C2227         | NVSSCGDHP  |  0(CYS motif) |    YES     |
+| 144  |        C2237         | EGCFCPPDK  | -1(CYS motif) |    YES     |
+| 145  |        C2278         | DHQPCQICT  |  0(CYS motif) |    YES     |
+| 146  |        C2283         | QICTCLSGR  |       1       |    YES     |
+| 147  |        C2291         | RKVNCTTQP  |       2       |    YES     |
+| 148  |        C2296         | TTQPCPTAK  |       1       |    YES     |
+| 149  |        C2304         | KAPTCGLCE  |  0(CYS motif) |    YES     |
+| 150  |        C2307         | TCGLCEVAR  |  0(CYS motif) |    YES     |
+| 151  |        H2339         | PPVPHCERG  |       1       |     NO     |
+| 152  |        C2340         | PVPHCERGL  |       1       |     NO     |
+| 153  |        C2354         | NPGECRPNF  |  0(CYS motif) |    YES     |
+| 154  |        C2360         | PNFTCACRK  |       2       |     NO     |
+| 155  |        C2362         | FTCACRKEE  |  0(CYS motif) |     NO     |
+| 156  |        C2367         | RKEECKRVS  |       2       |    YES     |
+| 157  |        C2375         | SPPSCPPHR  |       2       |    YES     |
+| 158  |        H2378         | SCPPHRLPT  |       2       |    YES     |
+| 159  |        C2388         | RKTQCCDEY  |  0(CYS motif) |     NO     |
+| 160  |        C2389         | KTQCCDEYE  | -2(CYS motif) |     NO     |
+| 161  |        C2425         | TTTTCLPDK  |  0(CYS motif) |    YES     |
+| 162  |        C2431         | PDKVCVHRS  |       2       |     NO     |
+| 163  |        H2433         | KVCVHRSTI  |       3       |     NO     |
+| 164  |        Y2438         | RSTIYPVGQ  |       1       |    YES     |
+| 165  |        C2468         | RVAQCSQKP  |       2       |    YES     |
+| 166  |        C2473         | SQKPCEDSC  | -1(CYS motif) |    YES     |
+| 167  |        C2477         | CEDSCRSGF  | -1(CYS motif) |    YES     |
+| 168  |        C2490         | HEGECCGRC  |  0(CYS motif) |     NO     |
+| 169  |        C2491         | EGECCGRCL  | -1(CYS motif) |     NO     |
+| 170  |        C2494         | CCGRCLPSA  |       1       |    YES     |
+| 171  |        C2533         | LINECVRVK  |       1       |    YES     |
+| 172  |        C2549         | RNVSCPQLE  |  0(CYS motif) |    YES     |
+| 173  |        C2565         | FQLSCKTSA  |       1       |    YES     |
+| 174  |        C2570         | KTSACCPSC  |       1       |     NO     |
+| 175  |        C2571         | TSACCPSCR  |       1       |     NO     |
+| 176  |        C2574         | CCPSCRCER  |       1       |     NO     |
+| 177  |        C2576         | PSCRCERME  |  0(CYS motif) |     NO     |
+| 178  |        C2582         | RMEACMLNG  |  0(CYS motif) |    YES     |
+| 179  |        C2600         | MIDVCTTCR  |  0(CYS motif) |    YES     |
+| 180  |        C2603         | VCTTCRCMV  |       1       |     NO     |
+| 181  |        C2605         | TTCRCMVQV  |       1       |     NO     |
+| 182  |        C2619         | FKLECRKTT  |       2       |    YES     |
+| 183  |        C2624         | RKTTCNPCP  |       2       |    YES     |
+| 184  |        C2640         | NTGECCGRC  |  0(CYS motif) |     NO     |
+| 185  |        C2641         | TGECCGRCL  |  0(CYS motif) |     NO     |
+| 186  |        C2644         | CCGRCLPTA  |       1       |    YES     |
+| 187  |        C2671         | LQDGCDTHF  | -1(CYS motif) |    YES     |
+| 188  |        H2674         | GCDTHFCKV  |       1       |     NO     |
+| 189  |        C2676         | DTHFCKVNE  |  0(CYS motif) |     NO     |
+| 190  |        C2693         | RVTGCPPFD  |  0(CYS motif) |    YES     |
+| 191  |        C2701         | DEHKCLAEG  | -1(CYS motif) |    YES     |
+| 192  |        Y2733         | ARLQYVKVG  |       2       |    YES     |
+| 193  |        C2739         | KVGSCKSEV  |       1       |    YES     |
+| 194  |        Y2749         | VDIHYCQGK  |       1       |     NO     |
+| 195  |        C2750         | DIHYCQGKC  |       1       |     NO     |
+| 196  |        C2754         | CQGKCASKA  |       2       |    YES     |
+| 197  |        C2774         | QCSCCSPTR  |       1       |    YES     |
+| 198  |        C2788         | VALHCTNGS  |       1       |    YES     |
+| 199  |        C2804         | NAMECKCSP  |  0(CYS motif) |     NO     |
+| 200  |        C2806         | MECKCSPRK  |       2       |     NO     |
+| 201  |        C2811         | KCSPRKCSK  |       4       |    YES     |
++------+----------------------+------------+---------------+------------+
+201 201 201
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+WORKING ON THE VALID SEQUENCE 5 . sp|P08123|CO1A2_HUMAN Collagen alpha-2(I) chain OS=Homo sapiens OX=9606 GN=COL1A2 PE=1 SV=7
+--------------------------------------------------------------------------------
+MLSFVDTRTLLLLAVTLCLATCQSLQEETVRKGPAGDRGPRGERGPPGPPGRDGEDGPTGPPGPPGPPGPPGLGGNFAAQYDGKGVGLGPGPMGLMGPRGPPGAAGAPGPQGFQGPAGEPGEPGQTGPAGARGPAGPPGKAGEDGHPGKPGRPGERGVVGPQGARGFPGTPGLPGFKGIRGHNGLDGLKGQPGAPGVKGEPGAPGENGTPGQTGARGLPGERGRVGAPGPAGARGSDGSVGPVGPAGPIGSAGPPGFPGAPGPKGEIGAVGNAGPAGPAGPRGEVGLPGLSGPVGPPGNPGANGLTGAKGAAGLPGVAGAPGLPGPRGIPGPVGAAGATGARGLVGEPGPAGSKGESGNKGEPGSAGPQGPPGPSGEEGKRGPNGEAGSAGPPGPPGLRGSPGSRGLPGADGRAGVMGPPGSRGASGPAGVRGPNGDAGRPGEPGLMGPRGLPGSPGNIGPAGKEGPVGLPGIDGRPGPIGPAGARGEPGNIGFPGPKGPTGDPGKNGDKGHAGLAGARGAPGPDGNNGAQGPPGPQGVQGGKGEQGPPGPPGFQGLPGPSGPAGEVGKPGERGLHGEFGLPGPAGPRGERGPPGESGAAGPTGPIGSRGPSGPPGPDGNKGEPGVVGAVGTAGPSGPSGLPGERGAAGIPGGKGEKGEPGLRGEIGNPGRDGARGAPGAVGAPGPAGATGDRGEAGAAGPAGPAGPRGSPGERGEVGPAGPNGFAGPAGAAGQPGAKGERGAKGPKGENGVVGPTGPVGAAGPAGPNGPPGPAGSRGDGGPPGMTGFPGAAGRTGPPGPSGISGPPGPPGPAGKEGLRGPRGDQGPVGRTGEVGAVGPPGFAGEKGPSGEAGTAGPPGTPGPQGLLGAPGILGLPGSRGERGLPGVAGAVGEPGPLGIAGPPGARGPPGAVGSPGVNGAPGEAGRDGNPGNDGPPGRDGQPGHKGERGYPGNIGPVGAAGAPGPHGPVGPAGKHGNRGETGPSGPVGPAGAVGPRGPSGPQGIRGDKGEPGEKGPRGLPGLKGHNGLQGLPGIAGHHGDQGAPGSVGPAGPRGPAGPSGPAGKDGRTGHPGTVGPAGIRGPQGHQGPAGPPGPPGPPGPPGVSGGGYDFGYDGDFYRADQPRSAPSLRPKDYEVDATLKSLNNQIETLLTPEGSRKNPARTCRDLRLSHPEWSSGYYWIDPNQGCTMDAIKVYCDFSTGETCIRAQPENIPAKNWYRSSKDKKHVWLGETINAGSQFEYNVEGVTSKEMATQLAFMRLLANYASQNITYHCKNSIAYMDEETGNLKKAVILQGSNDVELVAEGNSRFTYTVLVDGCSKKTNEWGKTIIEYKTNKPSRLPFLDIAPLDIGGADQEFFVDIGPVCFK
+------------------------------
+HEME COORDINATION SITE CHECK:
+------------------------------
+NOTE : Heme coordination check PASS!
+Length of sequence: 1366
+Total number of potential coordination sites found:  40
+Number of potential CYS based sites: 9
+Number of potential HIS based sites: 15
+Number of potential TYR based sites: 16 
+
+NOTE : Successfully built 9mer motifs for all the  40 potential coordination sites !
+--------------------------------------------------
+ADJACENT BASIC AMINO ACID CHECK:
+-----------------------------------
+NOTE : Screening all potential motifs for adjacent basic amino acids
+NOTE : 28 out of the 40 9mers PASS the adjacent basic amino acids check
+NOTE : These 28 9mers will be used in the next step to check for positive net charge
+-----------------------------------
+NET CHARGE CHECK:
+-----------------------------------
+NOTE : Checking net charge on the individual 9mer motifs
+NOTE : An individual motif PASSES this check if its net charge is positive
+NOTE : An individual motif also PASSES this check if its net charge is NOT positive BUT it is a CYS BASED motif
+NOTE : 21 out of 28 PASS the net charge check!
+--------------------------------------------------
+ADDITIONAL COORDINATION SITE CHECK
+--------------------------------------------------
+NOTE : Checking the presence of additional coordination sites
+NOTE : Additional coordination site check: PASS
+NOTE : Proceeding to check spacer length between coordination sites
+--------------------------------------------------
+SPACER DISTANCE CHECK
+--------------------------------------------------
+NOTE : 16 out of 21 PASS the spacer check!
+NOTE : All checks done, preparing tabular summary
+**************************************************************************************************************
+TABULAR SUMMARY
+NOTE : Please use the available structure information to only consider those motifs that are "surface exposed"
+**************************************************************************************************************
++------+----------------------+------------+--------------+------------+
+| S.no | Coordinating residue | 9mer motif |  Net charge  | Spacer > 2 |
++------+----------------------+------------+--------------+------------+
+|  1   |         H182         | GIRGHNGLD  |      1       |    YES     |
+|  2   |         H512         | GDKGHAGLA  |      1       |    YES     |
+|  3   |         H944         | GQPGHKGER  |      2       |    YES     |
+|  4   |         H975         | PAGKHGNRG  |      3       |    YES     |
+|  5   |        H1025         | GLKGHNGLQ  |      2       |    YES     |
+|  6   |        H1037         | GIAGHHGDQ  |      1       |     NO     |
+|  7   |        H1038         | IAGHHGDQG  |      1       |     NO     |
+|  8   |        H1070         | GRTGHPGTV  |      2       |    YES     |
+|  9   |        C1163         | PARTCRDLR  |      2       |    YES     |
+|  10  |        H1170         | LRLSHPEWS  |      1       |    YES     |
+|  11  |        C1195         | IKVYCDFST  | 0(CYS motif) |    YES     |
+|  12  |        C1203         | TGETCIRAQ  | 0(CYS motif) |    YES     |
+|  13  |        Y1217         | AKNWYRSSK  |      3       |    YES     |
+|  14  |        H1225         | KDKKHVWLG  |      3       |    YES     |
+|  15  |        Y1270         | QNITYHCKN  |      2       |     NO     |
+|  16  |        H1271         | NITYHCKNS  |      2       |     NO     |
+|  17  |        C1272         | ITYHCKNSI  |      2       |     NO     |
+|  18  |        Y1310         | SRFTYTVLV  |      1       |    YES     |
+|  19  |        C1317         | LVDGCSKKT  |      1       |    YES     |
+|  20  |        Y1331         | TIIEYKTNK  |      1       |    YES     |
+|  21  |        C1364         | VDIGPVCFK  | 0(CYS motif) |    YES     |
++------+----------------------+------------+--------------+------------+
+21 21 21
+
+
+********************************************************************************
+Execution time: 0.14 seconds
+********************************************************************************
