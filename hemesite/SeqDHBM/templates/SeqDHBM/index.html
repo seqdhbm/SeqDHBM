@@ -10,10 +10,10 @@ $(document).ready(function(){
         document.getElementById('emailwarn').innerHTML = ""
         $.get("runworkflow",
         {
-            pdbids:document.getElementById('pdbids').value,
-            fastafile:document.getElementById('fastafile').value,
+            //pdbids:document.getElementById('pdbids').value,
+            //fastafile:document.getElementById('fastafile').value,
             aaseq:document.getElementById('aaseq').value,
-            pdbfiles:document.getElementById('pdbfiles').value,
+            //pdbfiles:document.getElementById('pdbfiles').value,
             mode:$("input[name=mode]:checked").val()
 
         },
@@ -35,7 +35,7 @@ http://www.cbs.dtu.dk/services/NetSurfP/
 https://zhanglab.ccmb.med.umich.edu/I-TASSER/
 
 -->
-<!--{% if variablename %}
+{% if variablename %}
     <ul>
     {% for question in variablename %}
         <li><a href="/polls/{{ question }}/">{{ question }}</a></li>
@@ -43,22 +43,26 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
     </ul>
 {% else %}
     <p>No variables are available.</p>
-{% endif %}-->
-<hl>
+{% endif %}
+<hl> <!--Disabling controls that will first be used in future versions -->
 <p>Enter your email address. As the structure prediction can take a long time (from 5 to 90 minutes), this is mandatory if you want the structure to be predicted:</p>
 <p id="emailwarn" style="color:red;"></p>
-<p><input id="email" size="50" type="text" /></p>
+<p><input disabled id="email" size="50" type="text" /></p>
+ <!--Hiding controls that will first be used in future versions
 <p>Fasta file:</p>
 <p><input id="fastafile" size="50" type="file" /></p>
+-->
 <p>Sequence:</p>
 <p><textarea id="aaseq" cols="80" rows="4"></textarea></p>
+ <!--Hiding controls that will first be used in future versions
 <p>PDB files:</p>
 <p><input id="pdbfiles" type="file" /></p>
 <p>PDB ids:</p>
 <p><input id="pdbids" size="80" type="text"/></p>
+-->
 <p>Structure prediction:</p>
 <div>
-<div><input checked="checked" id="mode" name="mode" type="radio" value="structure" /> <label for="structure">Skip</label></div>
+<div><input checked="checked" disabled id="mode" name="mode" type="radio" value="structure" /> <label for="structure">Skip</label></div>
 <div><input id="mode" name="mode" type="radio" value="wesa" /> <label for="wesa">Predict</label></div>
 </div>
 <p><input id="run" name="send" type="submit" value="Run" /></p>

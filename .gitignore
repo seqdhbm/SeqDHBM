@@ -23,6 +23,7 @@ media
 *.so
 
 # Distribution / packaging
+hemesite/seqdhbm/
 .Python
 build/
 develop-eggs/
