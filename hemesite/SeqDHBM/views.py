@@ -14,7 +14,8 @@ def index(request):
 
 def hemewf(request):
     message=""
-    if request.GET.get('fastafile'):
+    rawseq  = request.GET.get('aaseq')
+    """if request.GET.get('fastafile'):
         message += '<p>You submitted: %r</p>' % request.GET['fastafile']
     if request.GET.get('sequence'):
         message += '<p>You submitted: %r</p>' % request.GET['sequence']
@@ -25,6 +26,14 @@ def hemewf(request):
     if request.GET.get('pdbids'):
         message += '<p>You submitted: %r</p>' % request.GET['pdbids']
     if request.GET.get('mode'):
-        message += '<p>You submitted: %r</p>' % request.GET['mode']
-    wf.workflow()
+        message += '<p>You submitted: %r</p>' % request.GET['mode']"""
+    result = wf.workflow(rawseq=rawseq)#fastafile="/home/imhof_team/Public/mauricio/workflow/test.fasta")#
+    try:
+        message += str(result)
+    except Exception as e:
+        message += str(e)
+    #for fold, sites in result:
+    #    message += '<p>fold:%s</p>'%fold
+    #    message += '<p>sites:%s</p>'%str(sites)
+
     return HttpResponse((message if message else "You submitted nothing!"))
