@@ -38,6 +38,8 @@ $(document).ready(function(){
 </p>
 <p>
   References: Tony's paper on motif importance (<a href="brokenlink">question</a>)</p>
+  <p>
+    Cite WESA</p>
 <hr>
 <h3>SeqD-HBM Online service:</h3>
 
@@ -57,6 +59,7 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
     <p>No variables are available.</p>
 {% endif %}
 <hl> <!--Disabling controls that will first be used in future versions -->
+
 <p>Enter your email address. As the structure prediction can take a long time (from 5 to 90 minutes), this is mandatory if you want the structure to be predicted:</p>
 <p id="emailwarn" style="color:red;"></p>
 <p><input disabled id="email" size="50" type="text" /></p>
@@ -72,12 +75,17 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
 <p>PDB ids:</p>
 <p><input id="pdbids" size="80" type="text"/></p>
 -->
-<p>Structure prediction:</p>
+<p>Filter prediction according to solvent accessibility (WESA):</p>
+<!--
+# for wesa prediction: read
+https://stackoverflow.com/questions/1239035/asynchronous-method-call-in-python
+-->
 <div>
 <div><input checked="checked" disabled id="mode" name="mode" type="radio" value="structure" /> <label for="structure">Skip</label></div>
-<div><input id="mode" name="mode" type="radio" value="wesa" /> <label for="wesa">Predict</label></div>
+<div><input disabled id="mode" name="mode" type="radio" value="wesa" /> <label for="wesa">Filter</label></div>
 </div>
 <p><input id="run" name="send" type="submit" value="Run" /></p>
+
 <p id="userresult"></p>
 
 </body>
