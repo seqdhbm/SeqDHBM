@@ -8,8 +8,24 @@ table, th, td {
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
 $(document).ready(function(){
+    // replace this for the commented code after implementing submission of emails
     $("#run").click(function(){
-      if ((document.getElementById('email').value == "") && ($("input[name=mode]:checked").val()=="wesa")) {
+      $.get("runworkflow",
+      {
+          //pdbids:document.getElementById('pdbids').value,
+          //fastafile:document.getElementById('fastafile').value,
+          aaseq:document.getElementById('aaseq').value,
+          //pdbfiles:document.getElementById('pdbfiles').value,
+          mode:$("input[name=mode]:checked").val()
+
+      },
+      function (data, status) {
+          document.getElementById('userresult').innerHTML = data
+      });
+      // replace until here
+
+
+      /*if ((document.getElementById('email').value == "") && ($("input[name=mode]:checked").val()=="wesa")) {
         document.getElementById('emailwarn').innerHTML = "This field is mandatory for structure predictions";
       } else {
         document.getElementById('emailwarn').innerHTML = ""
@@ -25,21 +41,43 @@ $(document).ready(function(){
         function (data, status) {
             document.getElementById('userresult').innerHTML = data
         });
-      }
+      }*/
   });
 });
 </script>
 </head>
 <body>
 <h1>[Seq]uence based [D]etection of [H]eme [B]inding [M]otifs</h1>
-<p>Instructions: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 <p>
-  SeqDHBM predicts the binding of Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+  The term "heme-binding motif" (HBM) is used to describe a protein sequence stretch that may interact with the heme molecule.
+  The evaluation of the binding behavior of a plethora of heme-peptide complexes resulted in the implementation of a prediction tool (SeqD-HBM) for heme-binding
+      motifs which eventually led and will perspectively lead to the identification and verification of so far unknown-heme-regulated proteins.
 </p>
 <p>
-  References: Tony's paper on motif importance (<a href="brokenlink">question</a>)</p>
-  <p>
-    Cite WESA</p>
+  A handful of computational tools are available to predict ligand binding to proteins. While these tools use complex algorithms and base their predictions on
+   extracting several novel features, the nature of binding usually described is the strong irreversible binding of heme (mostly within a binding pocket) and
+   not the transient binding of and regulation by heme.
+</p>
+<p>
+  The program processes the input sequence through a systematic stepwise validation,
+  extracting at each step relevant features from the sequence to produce a tabulated list of the possible heme-coordination sites available for the given sequence.
+</p>
+<p>
+  Besides reporting the potential heme-coordination sites, the program additionally outputs the 9mer motifs associated with the coordination site,
+  the charge of the motif and the possibility of a disulfide bridge close to the coordinating atom of the 9mer.
+  This comprehensive output further guides the user to make informed judgments on the nature of heme interaction with the protein of interest.
+</p>
+<p>
+  Further improvements to the interface are a work in progress.
+</p>
+<!--p>
+  <b>References:</b>
+<ul>
+ <li>Tony's paper on motif importance (<a href="brokenlink">question</a>)</li>
+</ul>
+</p>
+  <!--p>
+    Cite WESA</p-->
 <hr>
 <h3>SeqD-HBM Online service:</h3>
 
@@ -60,10 +98,11 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
 {% endif %}
 <hl> <!--Disabling controls that will first be used in future versions -->
 
-<p>Enter your email address. As the structure prediction can take a long time (from 5 to 90 minutes), this is mandatory if you want the structure to be predicted:</p>
+<!--Hiding controls that will first be used in future versions
+<p>Enter your email address to receive the complete analysis of the submitted sequences.
+  As the structure prediction can take a long time (from 5 to 90 minutes), this is mandatory if you want the structure to be predicted:</p>
 <p id="emailwarn" style="color:red;"></p>
 <p><input disabled id="email" size="50" type="text" /></p>
- <!--Hiding controls that will first be used in future versions
 <p>Fasta file:</p>
 <p><input id="fastafile" size="50" type="file" /></p>
 -->
