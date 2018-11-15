@@ -10,12 +10,11 @@ table, th, td {
 $(document).ready(function(){
     // replace this for the commented code after implementing submission of emails
     $("#run").click(function(){
+      var aaclean = document.getElementById('aaseq').value;
+      aaclean = aaclean.replace(/\r?\n|\ |\r/g, "");
       $.get("runworkflow",
       {
-          //pdbids:document.getElementById('pdbids').value,
-          //fastafile:document.getElementById('fastafile').value,
-          aaseq:document.getElementById('aaseq').value,
-          //pdbfiles:document.getElementById('pdbfiles').value,
+          aaseq:aaclean,//document.getElementById('aaseq').value,
           mode:$("input[name=mode]:checked").val()
 
       },
