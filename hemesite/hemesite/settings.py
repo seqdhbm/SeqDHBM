@@ -25,7 +25,7 @@ SECRET_KEY = '5pgt*d8okdh&$ae0*_u8jgr6ptw3c%h1ioa9ia1krdigz-qk^#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["131.220.127.75", "131.220.127.75", "127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -123,7 +123,7 @@ USE_TZ = True
  EMAIL_HOST_USER
  EMAIL_HOST_PASSWORD # settings, if set, are used to authenticate to the SMTP server
 
- EMAIL_USE_TLS 
+ EMAIL_USE_TLS
  EMAIL_USE_SSL
 # control whether a secure connection is used
 """
