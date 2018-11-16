@@ -3,6 +3,8 @@
 
 # Files created by the application
 .csv
+hemesite/jobs/
+pass.env
 
 ### Django ###
 *.log
