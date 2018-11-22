@@ -5,6 +5,12 @@ table, th, td {
     border: 1px solid black;
 }
 </style> <!-- TODO Put the style for the table in a CSS -->
+<!--
+Examples for website style:
+http://pipe.scs.fsu.edu/wesa/
+http://www.cbs.dtu.dk/services/NetSurfP/
+https://zhanglab.ccmb.med.umich.edu/I-TASSER/
+-->
 
 </head>
 <body>
@@ -57,12 +63,6 @@ table, th, td {
   {% endfor %}
   <input type="submit" value="Submit">
 </form>
-<!--
-Examples for website design:
-http://pipe.scs.fsu.edu/wesa/
-http://www.cbs.dtu.dk/services/NetSurfP/
-https://zhanglab.ccmb.med.umich.edu/I-TASSER/
--->
 
 <p id="userresult"></p>
 
@@ -85,6 +85,6 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
         </div>
     {% endfor %}
 {% endif %}
-{{ debug }}
+<font color="00fa00">{{ debug }}</font>
 </body>
 </html>

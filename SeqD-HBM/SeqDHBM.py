@@ -1,9 +1,9 @@
-
+#!/usr/bin/env python
 # coding: utf-8
 
 # # Imports
 
-# In[16]:
+# In[4]:
 
 
 #/usr/bin/env python
@@ -30,7 +30,7 @@ start = time.time() # Program start time
 
 # # Auxiliary functions
 
-# In[40]:
+# In[5]:
 
 
 def CalcExecTime(start):
@@ -94,7 +94,7 @@ def ReadFasta(filename):
 
 # # Important checks in case the program is called from command line
 
-# In[41]:
+# In[6]:
 
 
 if (__name__ == "__main__"):
@@ -152,7 +152,7 @@ if (__name__ == "__main__"):
 
 # # Program functions
 
-# In[42]:
+# In[22]:
 
 
 #################################################################################################################################################
@@ -193,15 +193,12 @@ def BuildNinemerSlice(seq,ind):
     
     seq_length = len(seq)
     
-    if (ind <= 4): # When the coordinating residue is found in the first 5 residues of the sequence
-        ninemer = seq[:ind+5] # String slice of the first 9 AAs of the sequence
-        return(ninemer.rjust(9, "_"))
-    elif(ind >= seq_length-5): # When the coordinating residue is found in the last 5 residues of the sequence
-        ninemer = seq[ind-4:] # String slice of the last 9 AAs of the sequence
-        return(ninemer.ljust(9, "_"))
-    else: # When the coordinating residue is in between and outside the above two conditions
-        return(seq[ind-4:ind+5])# String slice of the last 4 AAs from either side of the coord AA
-
+    # get the 4 aa before the coordinating. If at the beginning of the seq, add '_'
+    ninemer = seq[max(ind-4,0):ind].rjust(4, "_") + seq[ind:ind+5].ljust(5, "_")
+    
+    assert len(ninemer) == 9, "The ninemer could not be built properly"    
+    return ninemer
+    
 
 ##############################################################################################################################
 ################################################
@@ -325,15 +322,14 @@ def ShipSeqToWESA(seq,coord_list):
 
 # # Main function
 
-# In[49]:
+# In[38]:
 
 
-get_ipython().run_line_magic('time', '')
 ############################################################################################################################################
 ################################################
 #           Function: check_validity()
 ################################################
-def check_validity(fasta_dict):
+def check_validity(fasta_dict, out):
     """Function that takes the input as a dictionary and checks if any of the sequences contain invalid symbols.
     Displays any of the invalid sequence(s).
     Returns the valid sequence(s)"""
@@ -352,7 +348,7 @@ def check_validity(fasta_dict):
             #logging.info("NOTE : Sequence content check: SEQUENCE VALID !") # if all sequences have standard amino acids in the sequences then the value will be 0
             result[header] = sequence # Add only the valid sequences to the new dictionary
         else:
-            invalid_seq_dict[header] = sequence
+            out[header] = {"result": {}, "warnings": ["The sequence contains invalid characters other than the 20 standard amino acids"]}
     if (len(fasta_dict) == len(result)):
         logging.info("NOTE : All the %d sequences were verified to be valid !"%len(fasta_dict))
     else:
@@ -362,9 +358,9 @@ def check_validity(fasta_dict):
         logging.info("--------------------")
         logging.info("NOTE : The following sequence(s) contains invalid characters other than the 20 standard amino acids \n")
         inv=0
-        for head in invalid_seq_dict:
+        for head in out:
             inv += 1
-            logging.info("%d.%s"%(inv,head))
+            logging.info("%d.%s"%(inv,head[1:]))
     return result
 
 def coordination_site_check(seq):
@@ -393,21 +389,24 @@ def SpotCoordinationSite(fasta_dict, mode):
     invalid_seq_dict  = {} # Empty dictionary to collect all invalid seqence headers
     sno = 0
     MAX_SEQ_LENGTH_FOR_WESA = 2000
-    
-    
-    output = {} # the results of the check. Key is the fasta header and the values are a 
-                # dictionary with {coordinating_atom: spacercheck}
+        
+    output = {} 
+    """ the results of the check. Key is the fasta header and the values are another
+         dictionary with:
+         results:{coordinating_atom: {ninemer, netcharge, spacercheck}
+         comments: []} """
+
         
     ###############################
     # Check for sequence validity #
     ###############################
-    filtered_dict = check_validity(fasta_dict)
+    filtered_dict = check_validity(fasta_dict, output)
     if(len(filtered_dict) == 0): # if this dictionary is empty, then all sequences have errors and the program must exit
         logging.warning("NOTE : ALL SEQUENCES IN YOUR FILE CONTAIN ONE OR MORE INVALID CHARACTERS !!")
         logging.warning("NOTE : PLEASE CHECK YOUR INPUT SEQUENCE(S) AND TRY AGAIN !")
         logging.warning("NOTE : PROGRAM WILL EXIT NOW !")
         #CalcExecTime(start)
-        return dict() ## sys.exit() # Mauricio Changed
+        return output
 
     #################################
     # Work with the valid sequences #
@@ -429,9 +428,11 @@ def SpotCoordinationSite(fasta_dict, mode):
         pass_charge_index_list = [] # This list contains the indices of the coordination sites after the charge check is done
         spacer_dict = {} # Dict containing "y" or "n" values to check if two coordination sites are separated by a spacer of at least 2
         count_basic_adj_ninemer = 0 # Initialize the count of basic adjacent AAs in each ninemer
-        pass_charge_out_list = []
+        pass_charge_out_dict = {}
+        #1102 convert to dict
         wesa_substr_index_list = [] # List containing indices of the starting positions of the 9mers for comparison with the WESA output
         out_coord_atoms = {} # The output of the function for the current sequence
+        output[header] = {"warnings": [], "result": {}} # initialize the new rich dictionary
         cys_count = 0
         his_count = 0
         tyr_count = 0
@@ -522,6 +523,7 @@ def SpotCoordinationSite(fasta_dict, mode):
                 logging.info("NOTE : None of the 9mers have valid motifs")
                 logging.info("NOTE : The likelyhood of any part of this sequence binding or coordinating heme is very low !!!")
                 logging.info("NOTE : Checking the next valid sequence")
+                output[header]["warnings"] += ["None of the 9mers have valid motifs.",                                                "The likelyhood of any part of this sequence binding or coordinating heme is very low"]
                 logging.info("-" * 50)
                 logging.info("-" * 50)
                 continue
@@ -538,22 +540,21 @@ def SpotCoordinationSite(fasta_dict, mode):
             logging.info("NOTE : if it's net charge is positive")
             logging.info("NOTE : if it's neutral, but it is a CYS BASED motif")
             logging.info("NOTE : It's a CP coordinated motif")
-            #logging.info("-" * 50)
-            for z in dict_for_netCharge_calc:
-                net_charge_list.append(CheckNetCharge(dict_for_netCharge_calc[z]))
-            nt_cg_counter = 0 # counter to loop into the net_charge_list
             for d in dict_for_netCharge_calc:
-                if(net_charge_list[nt_cg_counter] > 0 ):
+                charge = CheckNetCharge(dict_for_netCharge_calc[d])
+                if(charge > 0 ):
                     pass_charge_dict[d] = dict_for_netCharge_calc[d]
-                    pass_charge_out_list.append(net_charge_list[nt_cg_counter])
-                elif (net_charge_list[nt_cg_counter] == 0 and d[0]=="C"):
+                    pass_charge_out_dict[d] = str(charge)
+                    #1102 convert to dict
+                elif (charge == 0 and d[0]=="C"):
                     pass_charge_dict[d] = dict_for_netCharge_calc[d]
-                    pass_charge_out_list.append (str(net_charge_list[nt_cg_counter])+"(CYS motif)")
+                    pass_charge_out_dict[d] = str(charge)+"(CYS motif)"
+                    #1102 convert to dict
                 elif d in cp_motif:
                     pass_charge_dict[d] = dict_for_netCharge_calc[d]
-                    pass_charge_out_list.append (str(net_charge_list[nt_cg_counter])+"(CP motif)")
+                    pass_charge_out_dict[d] = str(charge)+"(CP motif)"
+                    #1102 convert to dict
                 
-                nt_cg_counter += 1
             logging.info("NOTE : "+str(len(pass_charge_dict))+" out of %d PASS the net charge check!"% len(dict_for_netCharge_calc))
             #Additional coordination site check
             logging.info("-" * 50)
@@ -569,6 +570,7 @@ def SpotCoordinationSite(fasta_dict, mode):
             else:
                 logging.info("NOTE : No coordination sites passed the net charge check !")
                 logging.info("NOTE : It is very likely that this sequence does not bind/coordinate heme !")
+                output[header]["warnings"] += ["No coordination sites passed the net charge check.",                                                "It is very likely that this sequence does not bind/coordinate heme"]
                 continue
             #logging.info("\n")
             
@@ -614,7 +616,9 @@ def SpotCoordinationSite(fasta_dict, mode):
                 logging.warning("Warning:")
                 logging.warning("Structure prediction by the WESA server supports sequences with"+
                                 " length up to %d amino acids"%MAX_SEQ_LENGTH_FOR_WESA)
-                logging.warning("The current sequence has %d a.a. and is not supported.")
+                logging.warning("The current sequence has %d a.a. and is not supported."%current_sequence_length)
+                output[header]["warnings"] += ["Structure prediction by the WESA server supports sequences with"+                                                " length up to %d amino acids\n"%(MAX_SEQ_LENGTH_FOR_WESA)]
+                output[header]["warnings"] += ["The current sequence has %d a.a. and is not supported."%current_sequence_length]
             
             ##########################
             # WESA is not being used #
@@ -629,15 +633,16 @@ def SpotCoordinationSite(fasta_dict, mode):
                 # table = PrettyTable(["S.no", "Coord. residue", "9mer motif", "Net charge", "Spacer>2", "Binding"])
                 table = PrettyTable(["S.no", "Coord. residue", "9mer motif", "Net charge", "Comment"])
                 sr_no = 0
-                for coord in pass_charge_dict:
+                output[header]["result"] = {}
+                for coord in sorted(pass_charge_dict.keys(), key = lambda x: int(x[1:])):
+                    output[header]["result"][coord] = {"ninemer":pass_charge_dict[coord], 
+                                                        "netcharge":pass_charge_out_dict[coord], 
+                                                        "comment":disulfide_bond_check(pass_charge_dict[coord], cys_count)}
                     sr_no+= 1
                     out_coord_atoms[coord] = spacer_dict[int(coord[1:])]
-                    # table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_list[sr_no-1], spacer_dict[int(coord[1:])], "not def"])
-                    table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_list[sr_no-1], disulfide_bond_check(pass_charge_dict[coord], cys_count)])
+                    table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_dict[coord], 
+                                   disulfide_bond_check(pass_charge_dict[coord], cys_count)])
                 logging.info(table)
-                output[header] = out_coord_atoms
-                #logging.info(len(pass_charge_dict),len(pass_charge_out_list),len(spacer_list))
-                #return pass_charge_dict
 
 
             ######################
@@ -649,16 +654,11 @@ def SpotCoordinationSite(fasta_dict, mode):
                 pass_wesa_index_list=[]
                 wesa_spacer_dict={}
                 counter=0
-                logging.debug("wesa_return")
-                logging.debug(wesa_return)
                 for coord in pass_charge_dict:
                     if(wesa_return[counter]=="1"):
                         pass_wesa_index_list.append(int(coord[1:]))
                     counter+=1
-                logging.debug("pass_wesa_index_list")
-                logging.debug(pass_wesa_index_list)
                 if len(pass_wesa_index_list):
-                    logging.debug("Maybe i can just do it from here!")
                     if (len(pass_wesa_index_list) > 1):
                         for i in range(len(pass_wesa_index_list)):
                             if(i == 0):
@@ -684,18 +684,24 @@ def SpotCoordinationSite(fasta_dict, mode):
                     table = PrettyTable(["S.no", "Coordinating residue", "9mer motif", "Net charge", "Comment"])
                     sr_no=0
                     counter=0
-                    for coord in pass_charge_dict:
+                    output[header]["result"] = {}
+                    for coord in sorted(pass_charge_dict.keys(), key = lambda x: int(x[1:])):
+                    
+                        output[header]["result"][coord] = {"ninemer":pass_charge_dict[coord], 
+                                                            "netcharge":pass_charge_out_dict[coord], 
+                                                            "comment":disulfide_bond_check(pass_charge_dict[coord], cys_count)}
                         if(wesa_return[counter]=="1"):
                             sr_no+= 1
-                            # table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_list[counter], wesa_spacer_dict[int(coord[1:])], "not def"])
-                            table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_list[counter], disulfide_bond_check(pass_charge_dict[coord], cys_count)])
+                            table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_dict[coord], # pass_charge_out_list[counter], 
+                                           disulfide_bond_check(pass_charge_dict[coord], cys_count)])
+                            #1102 convert to dict
                             out_coord_atoms[coord] = wesa_spacer_dict[int(coord[1:])]
                         counter+=1
-                    output[header] = out_coord_atoms
                     logging.info(table)
                 else:
                     logging.info("*"*80)
                     logging.info("NOTE : YOUR SEQUENCE HAS NO SOLVENT ACCESSIBLE COORDINATION RESIDUES !")
+                    output[header]["warnings"] += ["Your sequence has no solvent accessible coordination residues."]
                     logging.info("*"*80)
         else: # When there are no coordinating sites in the sequence
             if(len(filtered_dict) == 1): # if the file contains only one sequence
@@ -705,6 +711,9 @@ def SpotCoordinationSite(fasta_dict, mode):
                 logging.info("NOTE : This is the only sequence on the file...nothing more to check !")
                 logging.info("-" * 80)
                 logging.info("PROGRAM WILL EXIT NOW !!")
+                # TODO Edit the message?
+                output[header]["warnings"] += ["The sequence does not have potential heme coordination sites(C, H, Y) "]
+                output[header]["warnings"] += ["It is very likely that this sequence does not bind/coordinate heme"]
                 return output 
             else: # When the file contains more than one sequence and we are now at the last sequence
                 if(sno == len(filtered_dict)):
@@ -715,19 +724,22 @@ def SpotCoordinationSite(fasta_dict, mode):
                     logging.info("-" * 80)
                     logging.info("PROGRAM WILL EXIT NOW !!")
                     # CalcExecTime(start)
+                    output[header]["warnings"] += ["The sequence does not have potential heme coordination sites(C, H, Y) "]
+                    output[header]["warnings"] += ["It is very likely that this sequence does not bind/coordinate heme"]
                     return output
                 logging.info("-" * 80) # Any sequence before the last sequence
                 logging.info("NOTE : It is very likely that this sequence does not bind/coordinate heme")
                 logging.info("NOTE : The sequence does not have potential heme coordination sites(C, H, Y), checking the next valid sequence !")
                 logging.info("NOTE : Nothing more to check..moving to the next valid sequece !!")
+                output[header]["warnings"] += ["The sequence does not have potential heme coordination sites(C, H, Y) "]
+                output[header]["warnings"] += ["It is very likely that this sequence does not bind/coordinate heme"]
                 logging.info("-" * 80)
     return output
 
 
-
 # # Run the code
 
-# In[50]:
+# In[9]:
 
 
 if (__name__ == "__main__"):
@@ -786,124 +798,8 @@ if (__name__ == "__main__"):
     CalcExecTime(start)
 
 
-# In[53]:
+# In[ ]:
 
 
-"""seq = "" # 
-seq = "" # 
-seq = "" # 
-seq = "MSENKNSEAEDVFEFLDSLPEAKNGGKMVNTDVKGSQEGVKGGSNSVAGKTGNDGKKGDD\
-DIFEFLEELEKSNLSLTDKKGVEKKAPSESVNNKAQDEKVEESKENKNSEQDAHGKEKEP\
-QQQEKEEEEEEEEEEEEEEEETPLHDPIASISNWWSSSGSAKVSSIWNKTAEQASQIKNR\
-LAQEQLDLTSKINTSTITEIARNLQKIVVGETEEVLRIHLVHDLVNYPSLQYNIESKFDQ\
-VLSSQVEGGIRIFVDEWGHPNNNGITPVEKKPSVADGELGNSKKKLQFNLFDGKVTDGEK\
-LAFANLENAVKLFNTAHEEYQKQQKEADATPDDDRSSISSNSNKISDLFISILPIAIPQK\
-QKDADGDFQVTDSNTPGNFNFTLVLKDITNDITTITRSQGFPVKWVNWLEGSVEKTGSTA\
-SEERNKSYDQKKQKESEDEDEDDEIIDPSEWVKEWIEDGLSLSFGVMAQNYVIDRMGL" # MTC1(478)
 
-seq = "MTKLHFDTAEPVKITLPNGLTYEQPTGLFINNKFMKAQDGKTYPVEDPSTENTVCEVSSA\
-TTEDVEYAIECADRAFHDTEWATQDPRERGRLLSKLADELESQIDLVSSIEALDNGKTLA\
-LARGDVTIAINCLRDAAAYADKVNGRTINTGDGYMNFTTLEPIGVCGQIIPWNFPIMMLA\
-WKIAPALAMGNVCILKPAAVTPLNALYFASLCKKVGIPAGVVNIVPGPGRTVGAALTNDP\
-RIRKLAFTGSTEVGKSVAVDSSESNLKKITLELGGKSAHLVFDDANIKKTLPNLVNGIFK\
-NAGQICSSGSRIYVQEGIYDELLAAFKAYLETEIKVGNPFDKANFQGAITNRQQFDTIMN\
-YIDIGKKEGAKILTGGEKVGDKGYFIRPTVFYDVNEDMRIVKEEIFGPVVTVAKFKTLEE\
-GVEMANSSEFGLGSGIETESLSTGLKVAKMLKAGTVWINTYNDFDSRVPFGGVKQSGYGR\
-EMGEEVYHAYTEVKAVRIKL" # ALD6(500)
-
-seq = "MKFSAGAVLSWSSLLLASSVFAQQEAVAPEDSAVVKLATDSFNEYIQSHDLVLAEFFAPW\
-CGHCKNMAPEYVKAAETLVEKNITLAQIDCTENQDLCMEHNIPGFPSLKIFKNSDVNNSI\
-DYEGPRTAEAIVQFMIKQSQPAVAVVADLPAYLANETFVTPVIVQSGKIDADFNATFYSM\
-ANKHFNDYDFVSAENADDDFKLSIYLPSAMDEPVVYNGKKADIADADVFEKWLQVEALPY\
-FGEIDGSVFAQYVESGLPLGYLFYNDEEELEEYKPLFTELAKKNRGLMNFVSIDARKFGR\
-HAGNLNMKEQFPLFAIHDMTEDLKYGLPQLSEEAFDELSDKIVLESKAIESLVKDFLKGD\
-ASPIVKSQEIFENQDSSVFQLVGKNHDEIVNDPKKDVLVLYYAPWCGHCKRLAPTYQELA\
-DTYANATSDVLIAKLDHTENDVRGVVIEGYPTIVLYPGGKKSESVVYQGSRSLDSLFDFI\
-KENGHFDVDGKALYEEAQEKAAEEADADAELADEEDAIHDEL" # PDI1(522)
-
-seq = "MSEKFPPLEDQNIDFTPNDKKDDDTDFLKREAEILGDEFKTEQDDILETEASPAKDDDEI\
-RDFEEQFPDINSANGAVSSDQNGSATVSSGNDNGEADDDFSTFEGANQSTESVKEDRSEV\
-VDQWKQRRAVEIHEKDLKDEELKKELQDEAIKHIDDFYDSYNKKKEQQLEDAAKEAEAFL\
-KKRDEFFGQDNTTWDRALQLINQDDADIIGGRDRSKLKEILLRLKGNAKAPGA" # CLC1(233)
-
-seq = "MSSAITALTPNQVNDELNKMQAFIRKEAEEKAKEIQLKADQEYEIEKTNIVRNETNNIDG\
-NFKSKLKKAMLSQQITKSTIANKMRLKVLSAREQSLDGIFEETKEKLSGIANNRDEYKPI\
-LQSLIVEALLKLLEPKAIVKALERDVDLIESMKDDIMREYGEKAQRAPLEEIVISNDYLN\
-KDLVSGGVVVSNASDKIEINNTLEERLKLLSEEALPAIRLELYGPSKTRKFFD" # VMA4(233) !!!
-
-seq = "MDSEVAALVIDNGSGMCKAGFAGDDAPRAVFPSIVGRPRHQGIMVGMGQKDSYVGDEAQS\
-KRGILTLRYPIEHGIVTNWDDMEKIWHHTFYNELRVAPEEHPVLLTEAPMNPKSNREKMT\
-QIMFETFNVPAFYVSIQAVLSLYSSGRTTGIVLDSGDGVTHVVPIYAGFSLPHAILRIDL\
-AGRDLTDYLMKILSERGYSFSTTAEREIVRDIKEKLCYVALDFEQEMQTAAQSSSIEKSY\
-ELPDGQVITIGNERFRAPEALFHPSVLGLESAGIDQTTYNSIMKCDVDVRKELYGNIVMS\
-GGTTMFPGIAERMQKEITALAPSSMKVKIIAPPERKYSVWIGGSILASLTTFQQMWISKQ\
-EYDESGPSIVHHKCF" # ACT1(375)
-
-seq = "MSSDLAAELGFDPALKKKKKTKKVIPDDFDAAVNGKENGSGDDLFAGLKKKKKKSKSVSA\
-DAEAEKEPTDDIAEALGELSLKKKKKKTKDSSVDAFEKELAKAGLDNVDAESKEGTPSAN\
-SSIQQEVGLPYSELLSRFFNILRTNNPELAGDRSGPKFRIPPPVCLRDGKKTIFSNIQDI\
-AEKLHRSPEHLIQYLFAELGTSGSVDGQKRLVIKGKFQSKQMENVLRRYILEYVTCKTCK\
-SINTELKREQSNRLFFMVCKSCGSTRSVSSIKTGFQATVGKRRRM" # SUI3(285)
-
-seq = "MNFNTPQQNKTPFSFGTANNNSNTTNQNSSTGAGAFGTGQSTFGFNNSAPNNTNNANSSI\
-TPAFGSNNTGNTAFGNSNPTSNVFGSNNSTTNTFGSNSAGTSLFGSSSAQQTKSNGTAGG\
-NTFGSSSLFNNSTNSNTTKPAFGGLNFGGGNNTTPSSTGNANTSNNLFGATANANKPAFS\
-FGATTNDDKKTEPDKPAFSFNSSVGNKTDAQAPTTGFSFGSQLGGNKTVNEAAKPSLSFG\
-SGSAGANPAGASQPEPTTNEPAKPALSFGTATSDNKTTNTTPSFSFGAKSDENKAGATSK\
-PAFSFGAKPEEKKDDNSSKPAFSFGAKSNEDKQDGTAKPAFSFGAKPAEKNNNETSKPAF\
-SFGAKSDEKKDGDASKPAFSFGAKPDENKASATSKPAFSFGAKPEEKKDDNSSKPAFSFG\
-AKSNEDKQDGTAKPAFSFGAKPAEKNNNETSKPAFSFGAKSDEKKDGDASKPAFSFGAKS\
-DEKKDSDSSKPAFSFGTKSNEKKDSGSSKPAFSFGAKPDEKKNDEVSKPAFSFGAKANEK\
-KESDESKSAFSFGSKPTGKEEGDGAKAAISFGAKPEEQKSSDTSKPAFTFGAQKDNEKKT\
-EESSTGKSTADVKSSDSLKLNSKPVELKPVSLDNKTLDDLVTKWTNQLTESASHFEQYTK\
-KINSWDQVLVKGGEQISQLYSDAVMAEHSQNKIDQSLQYIERQQDELENFLDNFETKTEA\
-LLSDVVSTSSGAAANNNDQKRQQAYKTAQTLDENLNSLSSNLSSLIVEINNVSNTFNKTT\
-NIDINNEDENIQLIKILNSHFDALRSLDDNSTSLEKQINSIKK" # NSP1(823)
-
-
-seq = "MSDFQKEKVEEQEQQQQQIIKIRITLTSTKVKQLENVSSNIVKNAEQHNLVKKGPVRLPT\
-KVLKISTRKTPNGEGSKTWETYEMRIHKRYIDLEAPVQIVKRITQITIEPGVDVEVVVAS\
-N" # RPS20(121)
-
-seq = "MPKLVLVRHGQSEWNEKNLFTGWVDVKLSAKGQQEAARAGELLKEKKVYPDVLYTSKLSR\
-AIQTANIALEKADRLWIPVNRSWRLNERHYGDLQGKDKAETLKKFGEEKFNTYRRSFDVP\
-PPPIDASSPFSQKGDERYKYVDPNVLPETESLALVIDRLLPYWQDVIAKDLLSGKTVMIA\
-AHGNSLRGLVKHLEGISDADIAKLNIPTGIPLVFELDENLKPSKPSYYLDPEAAAAGAAA\
-VANQGKK" # GPM1(247)
-
-seq = "MVKETKLYDLLGVSPSANEQELKKGYRKAALKYHPDKPTGDTEKFKEISEAFEILNDPQK\
-REIYDQYGLEAARSGGPSFGPGGPGGAGGAGGFPGGAGGFSGGHAFSNEDAFNIFSQFFG\
-GSSPFGGADDSGFSFSSYPSGGGAGMGGMPGGMGGMHGGMGGMPGGFRSASSSPTYPEEE\
-TVQVNLPVSLEDLFVGKKKSFKIGRKGPHGASEKTQIDIQLKPGWKAGTKITYKNQGDYN\
-PQTGRRKTLQFVIQEKSHPNFKRDGDDLIYTLPLSFKESLLGFSKTIQTIDGRTLPLSRV\
-QPVQPSQTSTYPGQGMPTPKNPSQRGNLIVKYKVDYPISLNDAQKRAIDENF" # SIS1(352)
-
-seq = "MGKEKSHINVVVIGHVDSGKSTTTGHLIYKCGGIDKRTIEKFEKEAAELGKGSFKYAWVL\
-DKLKAERERGITIDIALWKFETPKYQVTVIDAPGHRDFIKNMITGTSQADCAILIIAGGV\
-GEFEAGISKDGQTREHALLAFTLGVRQLIVAVNKMDSVKWDESRFQEIVKETSNFIKKVG\
-YNPKTVPFVPISGWNGDNMIEATTNAPWYKGWEKETKAGVVKGKTLLEAIDAIEQPSRPT\
-DKPLRLPLQDVYKIGGIGTVPVGRVETGVIKPGMVVTFAPAGVTTEVKSVEMHHEQLEQG\
-VPGDNVGFNVKNVSVKEIRRGNVCGDAKNDPPKGCASFNATVIVLNHPGQISAGYSPVLD\
-CHTAHIACRFDELLEKNDRRSGKKLEDHPKFLKSGDAALVKFVPSKPMCVEAFSEYPPLG\
-RFAVRDMRQTVAVGVIKSVDKTEKAAKVTKAAQKAAKK" # TEF2(458)
-
-
-seq = "MARTFFVGGNFKLNGSKQSIKEIVERLNTASIPENVEVVICPPATYLDYSVSLVKKPQVT\
-VGAQNAYLKASGAFTGENSVDQIKDVGAKWVILGHSERRSYFHEDDKFIADKTKFALGQG\
-VGVILCIGETLEEKKAGKTLDVVERQLNAVLEEVKDWTNVVVAYEPVWAIGTGLAATPED\
-AQDIHASIRKFLASKLGDKAASELRILYGGSANGSNAVTFKDKADVDGFLVGGASLKPEF\
-VDIINSRN" # TPI1(248) !!!
-
-if (sys.argv[0][-21:] == "ipykernel_launcher.py"):
-    if len(seq)<= 2000:
-        print(SpotCoordinationSite({">folder": seq}, 'wesa'))
-    else:
-        print("Sequence too big for wesa: %d"%len(seq))
-else:
-    print("You forgot to comment this line befor compiling.")
-    print("You forgot to comment this line befor compiling.")
-    print("You forgot to comment this line befor compiling.")
-    print("You forgot to comment this line befor compiling.")
-    print("You forgot to comment this line befor compiling.")
-    """;
 

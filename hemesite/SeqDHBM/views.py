@@ -3,37 +3,59 @@ from django.template import loader
 from django.core.mail import EmailMessage
 from .forms import SeqSubmission
 import seqdhbm.workflow as wf
+import SeqDHBM.models as mod
+from django.conf import settings
+import os
 
 # TODO read about security: https://docs.djangoproject.com/en/2.1/topics/security/#user-uploaded-content-security
-# TODO fix a bug in fasta.fasta_to_seq2 when the user gives an non fasta file.
+# TODO fix a bug in fasta.fasta_to_seq2 when the user gives an non fasta file. ok
+# TODO should I have a webpage with the results? can i redirect back to the main page on error?
+# TODO NEXT: Database
+#            -  Create jobs ok
+#            -  save the submission
+#            -  WESA queue
+#            -  save the results
+#            -  make the results accessisble
 # TODO check a service to verify if the email belongs to an academic institution
+# worklog: Fri Nov16th: 9:30 - 12:00; 13:00 - 18:30
+#          Thu Nov23rd: 10:00 - 12:00; 13:00 - 18:30
 
 # TODO: put this function somewhere appropriate:
-def handle_uploaded_file(f):
-    filename = 'jobs/mock.fasta'
+def handle_uploaded_file(f, filename):
     with open(filename, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    return filename
 
 def index(request):
-    # if this is a POST request we need to process the form data
     result = []
     debugging=""
+    # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
         form = SeqSubmission(request.POST, request.FILES)
-        # check whether it's valid:
+
         debugging = form.non_field_errors()
+        # check whether it's valid:
         if form.is_valid():
-            fastafile = ""
+            # Create the job
+            email = form.cleaned_data['email'] if form.cleaned_data['email'] else ""
+            myjob = mod.Job(submittedby= email)
+            myjob.save()
+            jobfolder = os.path.join(settings.BASE_DIR, "jobs/J%07d/"%myjob.id)
+            os.makedirs(jobfolder, exist_ok=True)
+            # obtain the fastafile
             if "fastafiles" in request.FILES:
-                fastafile = handle_uploaded_file(request.FILES['fastafiles'])
+                fastafile = request.FILES['fastafiles'].name
+                fastafilepath = os.path.join(jobfolder, request.FILES['fastafiles'].name)
+                handle_uploaded_file(request.FILES['fastafiles'], fastafilepath)
+            else:
+                fastafile = ""
+            # Obtain the manual input and clean it
             rawseq = form.cleaned_data['rawseq']
             rawseq = "".join(rawseq.split("\n"))
             rawseq = "".join(rawseq.split())
             rawseq = "".join(rawseq.split("\r"))
-            result = wf.workflow(rawseq=rawseq, fastafile=fastafile)
+            result = wf.workflow(jobfolder=jobfolder, rawseq=rawseq, fastafile=fastafile)
             # if all went well, send the email to the user
             # https://docs.djangoproject.com/en/2.1/topics/email/#django.core.mail.EmailMessage
             email = form.cleaned_data['email']
@@ -50,9 +72,6 @@ def index(request):
                 headers={'Message-ID': 'foo'},
                 )
                 e_msg.send(fail_silently=False)
-
-
-
     # if a GET (or any other method) we'll create a blank form
     else:
         form = SeqSubmission()
