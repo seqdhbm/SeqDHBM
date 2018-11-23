@@ -1,0 +1,27 @@
+<div>
+  {% for seq, seqchain in job.items %}
+      <h3>{{ seq.header }}</h3>
+      <font size="-1" face= 'Courier New'>
+        {% for line in seqchain %}
+         <p> {{ line }}</p>
+         {% endfor %}
+      </font>
+      <table>
+      {% for res in seq.result_hbm_set.all %}
+        <tr>
+          <td>{{ forloop.counter }} </td>
+          <td>{{ res.coord_atom }} </td>
+          <td>{{ res.ninemer }} </td>
+          <td>{{ res.net_charge }}</td>
+          <td>{% if res.comment %}
+            Possible disulfide bond
+          {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </table>
+      {% autoescape on %}
+        {{ seq.warnings_hbm | linebreaksbr }}
+      {% endautoescape %}
+  {% endfor %}
+</div>
