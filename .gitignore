@@ -4,6 +4,7 @@
 # Files created by the application
 .csv
 hemesite/jobs/
+workflow/seqdhbm/
 pass.env
 
 ### Django ###
@@ -28,7 +29,6 @@ media
 *.so
 
 # Distribution / packaging
-hemesite/seqdhbm/
 .Python
 build/
 develop-eggs/
