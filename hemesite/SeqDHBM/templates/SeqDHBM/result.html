@@ -1,0 +1,49 @@
+<html>
+<head>
+<style>
+table, th, td {
+    border: 1px solid black;
+}
+</style> <!-- TODO Put the style for the table in a CSS -->
+</head>
+<div>
+  <h2>Results for submission number: {{ job.id }}</h2>
+  <p>At {{ job.submission_date }}</p>
+  {% for seq, seqchain in result.items %}
+      <h3>{{ seq.header }}</h3>
+      <font size="-1" face= 'Courier New'>
+        {% for line in seqchain %}
+         <p> {{ line }}</p>
+         {% endfor %}
+      </font>
+      {% if seq.result_hbm_set.all|length %}
+      <table>
+        <tr>
+          <th>S.No</th>
+          <th>Coord. residue</th>
+          <th>9mer motif</th>
+          <th>Net charge</th>
+          <th>Comment</th>
+        </tr>
+        {% for res in seq.result_hbm_set.all %}
+          <tr>
+            <td>{{ forloop.counter }} </td>
+            <td>{{ res.coord_atom }} </td>
+            <td>{{ res.ninemer }} </td>
+            <td>{{ res.net_charge }}</td>
+            <td>{% if res.comment %}
+              Possible disulfide bond
+            {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+      <font {% if seq.status_hbm == seq.STATUS_FAILED %} color="fa0000" {% endif %}>
+      {% autoescape on %}
+        {{ seq.warnings_hbm | linebreaksbr }}
+      {% endautoescape %}
+      </font>
+  {% endfor %}
+</div>
+</html>

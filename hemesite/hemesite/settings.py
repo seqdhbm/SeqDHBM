@@ -15,12 +15,27 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+pw_dict = {}
+try:
+    with open (os.path.join(BASE_DIR, "hemesite/pass.env")) as f:
+        lines = f.read().splitlines()
+    for line in lines:
+        vals = line.split("\t")
+        pw_dict[vals[0]] = vals[1]
+except Exception as e:
+    print("*"*80)
+    print(e)
+    print("*"*80)
+    raise Exception("Please create the files with passwords 'pass.env' as a tsv file. Check the file 'example_pass.env' for a model.")
+
+
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '5pgt*d8okdh&$ae0*_u8jgr6ptw3c%h1ioa9ia1krdigz-qk^#'
+SECRET_KEY = pw_dict["SECRET_KEY"]# SECRET_KEY   ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -115,18 +130,17 @@ USE_L10N = True
 USE_TZ = True
 
 # Emails
-"""
 # Mail is sent using the SMTP host and port specified in the
- EMAIL_HOST
- EMAIL_PORT
-
- EMAIL_HOST_USER
- EMAIL_HOST_PASSWORD # settings, if set, are used to authenticate to the SMTP server
-
- EMAIL_USE_TLS
- EMAIL_USE_SSL
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 465 # 587 for TLS
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
 # control whether a secure connection is used
-"""
+
+EMAIL_HOST_USER = "seqdhbm@gmail.com"
+EMAIL_HOST_PASSWORD = pw_dict["EMAIL_HOST_PASSWORD"] # settings, if set, are used to authenticate to the SMTP server
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 

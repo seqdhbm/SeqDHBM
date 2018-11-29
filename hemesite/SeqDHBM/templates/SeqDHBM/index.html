@@ -5,45 +5,13 @@ table, th, td {
     border: 1px solid black;
 }
 </style> <!-- TODO Put the style for the table in a CSS -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script>
-$(document).ready(function(){
-    // replace this for the commented code after implementing submission of emails
-    $("#run").click(function(){
-      var aaclean = document.getElementById('aaseq').value;
-      aaclean = aaclean.replace(/\r?\n|\ |\r/g, "");
-      $.post("runworkflow/",
-      {
-          aaseq:aaclean,
-          mode:$("input[name=mode]:checked").val()
+<!--
+Examples for website style:
+http://pipe.scs.fsu.edu/wesa/
+http://www.cbs.dtu.dk/services/NetSurfP/
+https://zhanglab.ccmb.med.umich.edu/I-TASSER/
+-->
 
-      },
-      function (data, status) {
-          document.getElementById('userresult').innerHTML = data
-      });
-      // replace until here
-
-
-      /*if ((document.getElementById('email').value == "") && ($("input[name=mode]:checked").val()=="wesa")) {
-        document.getElementById('emailwarn').innerHTML = "This field is mandatory for structure predictions";
-      } else {
-        document.getElementById('emailwarn').innerHTML = ""
-        $.get("runworkflow",
-        {
-            //pdbids:document.getElementById('pdbids').value,
-            //fastafile:document.getElementById('fastafile').value,
-            aaseq:document.getElementById('aaseq').value,
-            //pdbfiles:document.getElementById('pdbfiles').value,
-            mode:$("input[name=mode]:checked").val()
-
-        },
-        function (data, status) {
-            document.getElementById('userresult').innerHTML = data
-        });
-      }*/
-  });
-});
-</script>
 </head>
 <body>
 <h1>[Seq]uence based [D]etection of [H]eme [B]inding [M]otifs</h1>
@@ -79,52 +47,45 @@ $(document).ready(function(){
     Cite WESA</p-->
 <hr>
 <h3>SeqD-HBM Online service:</h3>
-
-<!--
-Examples for website design:
-http://pipe.scs.fsu.edu/wesa/
-http://www.cbs.dtu.dk/services/NetSurfP/
-https://zhanglab.ccmb.med.umich.edu/I-TASSER/
-
-{% if variablename %}
-    <ul>
-    {% for question in variablename %}
-        <li><a href="/polls/{{ question }}/">{{ question }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No variables are available.</p>
-{% endif %}
-<hl> <!--Disabling controls that will first be used in future versions -->
-
-<!--Hiding controls that will first be used in future versions
-<p>Enter your email address to receive the complete analysis of the submitted sequences.
-  As the structure prediction can take a long time (from 5 to 90 minutes), this is mandatory if you want the structure to be predicted:</p>
-<p id="emailwarn" style="color:red;"></p>
-<p><input disabled id="email" size="50" type="text" /></p>
-<p>Fasta file:</p>
-<p><input id="fastafile" size="50" type="file" /></p>
--->
-<p>Paste your sequence data:</p>
-<p><textarea id="aaseq" cols="80" rows="4"></textarea></p>
- <!--Hiding controls that will first be used in future versions
-<p>PDB files:</p>
-<p><input id="pdbfiles" type="file" /></p>
-<p>PDB ids:</p>
-<p><input id="pdbids" size="80" type="text"/></p>
--->
-<p>Filter prediction according to solvent accessibility (WESA):</p>
-<!--
-# for wesa prediction: read
-https://stackoverflow.com/questions/1239035/asynchronous-method-call-in-python
--->
-<div>
-<div><input checked="checked" disabled id="mode" name="mode" type="radio" value="structure" /> <label for="structure">Skip</label></div>
-<div><input disabled id="mode" name="mode" type="radio" value="wesa" /> <label for="wesa">Filter</label></div>
-</div>
-<p><input id="run" name="send" type="submit" value="Run" /></p>
+<form enctype="multipart/form-data" action="/SeqDHBM/" method="post">
+  {% csrf_token %}
+  {% if errors %}
+  <p>
+    <!-- https://docs.djangoproject.com/en/2.1/ref/forms/api/#how-errors-are-displayed -->
+    And the errors are:
+    {{ errors.as_p }}
+  </p>
+  {% endif %}
+  {% for field in form %}
+      <div class="fieldWrapper">
+          <p> {{ field.label_tag }} </p>
+          <p> {{ field }} </p>
+          <font color="fa0000"> {{ field.errors }} </font>
+      </div>
+  {% endfor %}
+  <input type="submit" value="Submit">
+</form>
 
 <p id="userresult"></p>
-
+{% if results %}
+    {% for result in results %}
+        <div>
+          <H3>  {{ result.name }} </H3>
+          <!--TODO divide the sequence in lines with 70 chars-->
+          <p><font size="-1" face= 'Courier New'> {{ result.seq }} </font> </p>
+          {% for coord, data in result.result.items %}
+              {{ coord }}
+              {{ data.ninemer }}
+              {{ data.netcharge }}
+              {{ data.comment }}
+          {% endfor %}
+          <!-- TODO use red for fail -->
+          {% for warn in result.warnings %}
+            <p> {{ warn }}</p>
+          {% endfor %}
+        </div>
+    {% endfor %}
+{% endif %}
+<font color="00fa00">{{ debug }}</font>
 </body>
 </html>
