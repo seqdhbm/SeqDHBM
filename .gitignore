@@ -4,7 +4,6 @@
 # Files created by the application
 .csv
 hemesite/jobs/
-workflow/seqdhbm/
 pass.env
 
 ### Django ###
