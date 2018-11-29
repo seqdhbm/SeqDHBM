@@ -2,7 +2,6 @@ from django.http import HttpResponse
 from django.template import loader
 from django.core.mail import EmailMessage
 
-
 import seqdhbm.workflow as wf
 
 def index(request):
@@ -15,7 +14,7 @@ def index(request):
 
 def hemewf(request):
     message=""
-    rawseq  = request.GET.get('aaseq')
+    rawseq  = request.POST.get('aaseq')
     result_list = wf.workflow(rawseq=rawseq)#fastafile="/home/imhof_team/Public/mauricio/workflow/test.fasta")#
     try:
         for result in result_list:
@@ -24,8 +23,12 @@ def hemewf(request):
             for i in range(0, len(result["seq"]), 70):
                 message += "<p>%s</p>"%result["seq"][i:i+70]
             message += "</font>"
+            if result["fail"]:
+                message += "<font color='FF0000'><b>"
             for warn in result["warnings"]:
                 message += "<p>%s</p>"%warn
+            if result["fail"]:
+                message += "</b></font>"
             if result["result"]:
                 message += "<table>"
                 message += """<tr>
