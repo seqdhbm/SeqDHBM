@@ -1,9 +1,13 @@
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic.base import RedirectView
+
+favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 
 urlpatterns = [
     path('SeqDHBM/', include('SeqDHBM.urls')),
     path('admin/', admin.site.urls),
+    path(r'^favicon\.ico$', favicon_view)
     # path(<route>, <view>, <kwargs>, <name>)
     # <route> contains a URL pattern. Django starts at the first pattern in urlpatterns
     #  and makes its way down the list, comparing the requested URL against each pattern until it finds one that matches
