@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 # coding: utf-8
 
 # # Imports
@@ -737,6 +737,7 @@ def SpotCoordinationSite(fasta_dict, mode):
     return output
 
 
+
 # # Run the code
 
 # In[9]:
@@ -796,10 +797,4 @@ if (__name__ == "__main__"):
     
     SpotCoordinationSite(ReadFasta(fo) , operation_mode)
     CalcExecTime(start)
-
-
-# In[ ]:
-
-
-
 

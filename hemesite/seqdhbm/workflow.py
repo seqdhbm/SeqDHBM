@@ -4,10 +4,12 @@
 # In[3]:
 
 
+import logging
 OUTPUT_FILE = "output_yeast_structure.csv"
 INPUT_FILE = '/home/imhof_team/Public/mauricio/workflow/yeast_type3/yeast_type3_safe2.fasta'
 
-import logging
+
+
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 
 #import experiments
@@ -167,6 +169,9 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode
                     seq_obj.status_hbm = models.Sequence.STATUS_PROCESSED
 
                 # Output? Save in our user output?
+                print("*"*80)
+                print("A")
+                print(analysedSeq)
                 item["result"] = analysedSeq["result"]
                 for coord, res in analysedSeq["result"].items():
                     res_obj = models.Result_HBM(
@@ -177,7 +182,7 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode
                         disulfide_possible = bool(res['comment'].strip())
                     )
                     res_obj.save()
-
+                item["analysis"] = analysedSeq["analysis"]
                 item["warnings"] = analysedSeq["warnings"]
                 seq_obj.warnings_hbm = "\n".join(analysedSeq["warnings"])
                 seq_obj.save()

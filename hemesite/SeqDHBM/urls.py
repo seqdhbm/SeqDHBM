@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('runworkflow/', views.hemewf, name='hemewf'),
     path('<int:job_id>/', views.show_result, name='result'),
+    path('analysis/<int:job_id>/', views.show_analysis, name='analysis'),
     # path(<route>, <view>, <kwargs>, <name>)
     # <route> contains a URL pattern. Django starts at the first pattern in urlpatterns
     #  and makes its way down the list, comparing the requested URL against each pattern until it finds one that matches

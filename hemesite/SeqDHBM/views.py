@@ -61,6 +61,16 @@ def index(request):
             rawseq = "".join(rawseq.split())
             rawseq = "".join(rawseq.split("\r"))
             result = wf.workflow(jobfolder=jobfolder, rawseq=rawseq, fastafile=fastafile, job=myjob)
+            print(result)
+
+            ANALYSIS_HEADER = "*"*100
+            ANALYSIS_HEADER += "\nSeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs\n"
+            ANALYSIS_HEADER += myjob.submission_date.strftime("%A , %B-%d-%Y, %H:%M:%S")
+            ANALYSIS_HEADER += "\nJob number %d\n"%myjob.id
+            ANALYSIS_HEADER += "Full analysis report\n" +("*"*100)+ "\n\n"
+
+            myjob.full_hbm_analysis = ANALYSIS_HEADER + "\n\n\n".join([x["analysis"] for x in result])
+            myjob.save()
 
             # if all went well, send the email to the user
             # https://docs.djangoproject.com/en/2.1/topics/email/#django.core.mail.EmailMessage
@@ -78,7 +88,7 @@ def index(request):
                     headers={'Message-ID': 'foo'},
                 )
                 e_msg.send(fail_silently=False)
-            return redirect("%d/"%myjob.id, permanent=True)
+            return redirect("%d/"%myjob.id)
     # if a GET (or any other method) we'll create a blank form
     else:
         form = SeqSubmission()
@@ -94,16 +104,22 @@ def index(request):
 def show_result(request, job_id):
     template = loader.get_template('SeqDHBM/result.html')
     job = get_object_or_404(models.Job, id=job_id)
-    seqs = get_list_or_404(models.Sequence, jobnum=job_id)
+    seqs = get_list_or_404(models.Sequence, jobnum=job)
     print (job)
     res = {}
     for seq in seqs:
         res[seq] = [seq.seqchain[x:x+70] for x in range(0, len(seq.seqchain), 70)]
     context = {
         "job": job,
-        "result": res
+        "result": {x:y for x,y in res.items() if x.status_hbm not in [models.Sequence.STATUS_FAILED, models.Sequence.STATUS_SKIPPED] },
+        "failed": {x:y for x,y in res.items() if x.status_hbm == models.Sequence.STATUS_FAILED}
     }
     return HttpResponse(template.render(context, request))
+
+
+def show_analysis(request, job_id):
+    job = get_object_or_404(models.Job, id=job_id)
+    return HttpResponse(job.full_hbm_analysis, content_type="text/plain")
 
 
 def hemewf(request):
