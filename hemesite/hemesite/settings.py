@@ -20,13 +20,13 @@ try:
     with open (os.path.join(BASE_DIR, "hemesite/pass.env")) as f:
         lines = f.read().splitlines()
     for line in lines:
-        vals = line.split("\t")
+        vals = line.split(",")
         pw_dict[vals[0]] = vals[1]
 except Exception as e:
     print("*"*80)
     print(e)
     print("*"*80)
-    raise Exception("Please create the files with passwords 'pass.env' as a tsv file. Check the file 'example_pass.env' for a model.")
+    raise Exception("Please create the files with passwords '/hemesite/pass.env' as a csv file. Check the file 'example_pass.env' for a model.")
 
 
 
