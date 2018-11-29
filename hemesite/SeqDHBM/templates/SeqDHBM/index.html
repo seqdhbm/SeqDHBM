@@ -12,9 +12,9 @@ $(document).ready(function(){
     $("#run").click(function(){
       var aaclean = document.getElementById('aaseq').value;
       aaclean = aaclean.replace(/\r?\n|\ |\r/g, "");
-      $.get("runworkflow",
+      $.post("runworkflow/",
       {
-          aaseq:aaclean,//document.getElementById('aaseq').value,
+          aaseq:aaclean,
           mode:$("input[name=mode]:checked").val()
 
       },
