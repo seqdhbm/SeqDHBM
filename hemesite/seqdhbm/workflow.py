@@ -8,18 +8,13 @@ import logging
 OUTPUT_FILE = "output_yeast_structure.csv"
 INPUT_FILE = '/home/imhof_team/Public/mauricio/workflow/yeast_type3/yeast_type3_safe2.fasta'
 
-
-
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
-
-#import experiments
-import seqdhbm.SeqDHBM as SeqDHBM
-import seqdhbm.fasta as fasta
-import seqdhbm.pdbfiles as pdbfiles
-from SeqDHBM import models
+from . import fasta, pdbfiles, SeqDHBM
+from SeqDHBM import models, tasks
 import sys, os
 import shutil
 import time
+
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 
 def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode="structure", job=None):
     """ Runs the workflow
@@ -39,13 +34,10 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode
     # this has to come first, otherwise organize_sequences2 will run on unnecessary sequences
     if fastafile:
         try:
-            """seq_dict = fasta.fasta_to_seq(fastafile)
-            fasta.organize_sequences(seq_dict)"""
             seq_list = fasta.fasta_to_seq2(fastafile, jobfolder)
-            fasta.organize_sequences2(seq_dict)
+            print(tasks.assync_organize_seq.delay(seq_list))
+            #fasta.organize_sequences2(seq_list)
 
-            #logging.debug("fasta:")
-            #logging.debug(seq_dict.keys())
         except Exception as e:
             seq_list += [{"seq":"",
                          "name":"Your fasta File",
@@ -169,9 +161,6 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode
                     seq_obj.status_hbm = models.Sequence.STATUS_PROCESSED
 
                 # Output? Save in our user output?
-                print("*"*80)
-                print("A")
-                print(analysedSeq)
                 item["result"] = analysedSeq["result"]
                 for coord, res in analysedSeq["result"].items():
                     res_obj = models.Result_HBM(

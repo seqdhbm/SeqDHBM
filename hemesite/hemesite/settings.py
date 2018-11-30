@@ -28,6 +28,16 @@ except Exception as e:
     print("*"*80)
     raise Exception("Please create the files with passwords '/hemesite/pass.env' as a csv file. Check the file 'example_pass.env' for a model.")
 
+# Celery settings
+
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+
+#: Only add pickle to this list if your broker is secured
+#: from unwanted access (see userguide/security.html)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_IMPORTS = ['seqdhbm']
 
 
 

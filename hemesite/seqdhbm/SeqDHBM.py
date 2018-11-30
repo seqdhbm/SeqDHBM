@@ -37,11 +37,11 @@ start = time.time() # Program start time
 
 def CalcExecTime(start):
     """ """
-    logging.info("\n")
-    logging.info("*" * 80)
+    #logging.info("\n")
+    #logging.info("*" * 80)
     end = round((time.time() - start),2)
-    logging.info("Execution time: "+ str(end)+ " seconds")
-    logging.info("*" * 80)
+    #logging.info("Execution time: "+ str(end)+ " seconds")
+    #logging.info("*" * 80)
 
 
 def ReadFasta(filename):
@@ -87,10 +87,10 @@ def ReadFasta(filename):
     for header in header_list:
         fasta_dict[header] = sequence_list[key]
         key += 1
-    logging.info("--------------------------")
-    logging.info("INPUT FILE CONTENT SUMMARY:")
-    logging.info("--------------------------")
-    logging.info("NOTE : Your input file contains "+str(len(header_list))+" sequence(s)")
+    #logging.info("--------------------------")
+    #logging.info("INPUT FILE CONTENT SUMMARY:")
+    #logging.info("--------------------------")
+    #logging.info("NOTE : Your input file contains "+str(len(header_list))+" sequence(s)")
     return(fasta_dict)
 
 
@@ -103,29 +103,29 @@ if (__name__ == "__main__"):
     if (sys.argv[0][-21:] == "ipykernel_launcher.py"):
         # running from notebook for testing
         scriptname = "Seq-HBM"
-        logging.info('*'*80)
-        logging.info(scriptname+" v0.12")
-        logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
-        logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
-        logging.info('*'*80)
+        #logging.info('*'*80)
+        #logging.info(scriptname+" v0.12")
+        #logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
+        #logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
+        #logging.info('*'*80)
         input_file_path = "/home/imhof_team/Public/mauricio/SeqD-HBM"
         input_file_name = "test.fasta"
         operation_mode = "structure"
         if(os.path.isfile(os.path.join(input_file_path,input_file_name))): #Check if the file exists
             fo=os.path.join(input_file_path,input_file_name)
-            logging.info("NOTE : Your input file is: "+ input_file_name)
+            #logging.info("NOTE : Your input file is: "+ input_file_name)
         else:
-            logging.info("\nINPUT FILE MISSING ! EXITING NOW !")
+            #logging.info("\nINPUT FILE MISSING ! EXITING NOW !")
             CalcExecTime(start)
             sys.exit()
     else:
         ##################################################
         scriptname = os.path.basename(__file__)
-        logging.info('*'*80)
-        logging.info(scriptname+" v0.12")
-        logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
-        logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
-        logging.info('*'*80)
+        #logging.info('*'*80)
+        #logging.info(scriptname+" v0.12")
+        #logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
+        #logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
+        #logging.info('*'*80)
         #################################################
         if (len(sys.argv)<3 or (sys.argv[2] not in ["wesa","structure"])):
             logging.error("TOO FEW or INCORRECT command line arguments !")
@@ -139,13 +139,13 @@ if (__name__ == "__main__"):
             sys.exit()
         #File Path
         input_file_path = os.path.dirname(os.path.realpath(__file__))
-        logging.info(input_file_path)
+        #logging.info(input_file_path)
         input_file_name=sys.argv[1]
         operation_mode=sys.argv[2]
 
         if(os.path.isfile(os.path.join(input_file_path,input_file_name))): #Check if the file exists
             fo=os.path.join(input_file_path,input_file_name)
-            logging.info("NOTE : Your input file is: "+ input_file_name)
+            #logging.info("NOTE : Your input file is: "+ input_file_name)
         else:
             logging.error("\nINPUT FILE MISSING ! EXITING NOW !")
             CalcExecTime(start)
@@ -188,7 +188,8 @@ def SequenceValidityCheck(current_sequence_list):
 def mylog(lvl, buffer, line):
     """Gets a line of a message. Log it and save into a variable.
     """
-    logging.log(lvl, line)
+    # FOR MORE OUTPUT IN DJANGO CONSOLE, UNCOMMENT THE LINE BELLOW
+    # logging.log(lvl, line)
     buffer+= [line]
 
 
@@ -210,10 +211,7 @@ def BuildNinemerSlice(seq,ind):
 
     # get the 4 aa before the coordinating. If at the beginning of the seq, add '_'
     ninemer = ""
-    ninemer = seq[max(ind-4,0):ind].rjust(4, "_")
-
-    # get the coordinating aa and 4 trailing. If at the end of the seq, add '_'
-    ninemer += seq[ind:ind+5].ljust(5, "_")
+    ninemer = seq[max(ind-4,0):ind].rjust(4, "_") + seq[ind:ind+5].ljust(5, "_")
 
     assert len(ninemer) == 9, "The ninemer could not be built properly"
     return ninemer
@@ -295,34 +293,32 @@ def ShipSeqToWESA(seq,coord_list):
         html=jobname+'.html'
         wesa_tup='python2 WESA-submit.py',jobname, email, inp_file, '>', html # This is stored as a tuple
         wesa_str=' '.join(wesa_tup) # Convert the tpule to string
-        #logging.info(wesa_str)
         os.system(wesa_str) # Send the job to the WESA server
         out_list=""
         wesa_wget_tup='wget -O',jobname+'.out', '-F -i', html
         wesa_wget_str=' '.join(wesa_wget_tup) # Convert the tpule to string
-        #logging.info(wesa_wget_tup[1])
         os.system(wesa_wget_str) # Download the output as a .out file
         file_size=os.stat(wesa_wget_tup[1]) # contains the file size of the output file
         initial_file_size=file_size.st_size
-        logging.info("*"*80)
-        logging.info("NOTE : Your sequence has been posted to the WESA server for solvent accessibility prediction")
-        logging.info("NOTE : This might take a few minutes....grab a coffee maybe?")
-        logging.info("NOTE : Making attempts at 30 second intervals to see if the WESA prediction is complete")
-        logging.info("*"*80)
+        #logging.info("*"*80)
+        #logging.info("NOTE : Your sequence has been posted to the WESA server for solvent accessibility prediction")
+        #logging.info("NOTE : This might take a few minutes....grab a coffee maybe?")
+        #logging.info("NOTE : Making attempts at 30 second intervals to see if the WESA prediction is complete")
+        #logging.info("*"*80)
         final_file_size=0
         attempt_count=0
         while (initial_file_size>=final_file_size):
             attempt_count+=1
-            logging.info("NOTE : Attempt " + str(attempt_count)+" to fetch WESA output...")
-            logging.info("*"*80)
+            #logging.info("NOTE : Attempt " + str(attempt_count)+" to fetch WESA output...")
+            #logging.info("*"*80)
             time.sleep(30)
             os.system(wesa_wget_str) # Download and overwrite the .out file
             time.sleep(2)
             f_size=os.stat(wesa_wget_tup[1])
             final_file_size=f_size.st_size
-        logging.info("*"*80)
-        logging.info("NOTE : WESA solvent accessibility prediction complete !")
-        logging.info("*"*80)
+        #logging.info("*"*80)
+        #logging.info("NOTE : WESA solvent accessibility prediction complete !")
+        #logging.info("*"*80)
 
         with open('SeqDHBM2WESA.out', 'r') as f: # Read the contents of the output file from WESA
             line_list=[]
@@ -338,49 +334,6 @@ def ShipSeqToWESA(seq,coord_list):
         os.chdir("..")
     return(out_list)
 
-
-# # Main function
-
-# In[12]:
-
-
-############################################################################################################################################
-################################################
-#           Function: check_validity()
-################################################
-def check_validity(fasta_dict, out):
-    """Function that takes the input as a dictionary and checks if any of the sequences contain invalid symbols.
-    Displays any of the invalid sequence(s).
-    Returns the valid sequence(s)"""
-    sno=0
-    result = {}
-    logging.info("--------------------------")
-    logging.info("SEQUENCE VALIDITY CHECK:")
-    logging.info("--------------------------")
-    for header, sequence in fasta_dict.items(): # Iterate through the dictionary
-        sno += 1
-        current_sequence =(sequence)
-        current_sequence_list = list(current_sequence) # Split the sequence into a list
-
-        #logging.info("***** Checking sequence",sno,"under header:", header[1:],"*****")
-        if(SequenceValidityCheck(current_sequence_list) == 0): # Pass the list to the SequenceValidityCheck function
-            result[header] = sequence # Add only the valid sequences to the new dictionary
-        else:
-            out[header] = {"result": {},
-                           "warnings": ["The sequence contains invalid characters other than the 20 standard amino acids"]}
-    if (len(fasta_dict) == len(result)):
-        logging.info("NOTE : All the %d sequences were verified to be valid !"%len(fasta_dict))
-    else:
-        logging.info("NOTE : %d sequences out of %d are valid"%(len(result),len(fasta_dict)))
-        logging.info("---------------------")
-        logging.info(" INVALID SEQUENCE(S)")
-        logging.info("---------------------")
-        logging.info("NOTE : The following sequence(s) contains invalid characters other than the 20 standard amino acids \n")
-        inv=0
-        for head in out:
-            inv += 1
-            logging.info("%d.%s"%(inv,head[1:]))
-    return result
 
 def coordination_site_check(seq):
     """Write when you can"""
@@ -405,11 +358,11 @@ def disulfide_bond_check(ninemer, cys_cnt):
 ##############################################################################################################################################################
 def SpotCoordinationSite(fasta_dict, mode):
     scriptname = "SeqD-HBM Online Service"
-    logging.info('*'*80)
-    logging.info("SeqD-HBM v0.12")
-    logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
-    logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
-    logging.info('*'*80)
+    #logging.info('*'*80)
+    #logging.info("SeqD-HBM v0.12")
+    #logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
+    #logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
+    #logging.info('*'*80)
 
 
     filtered_dict = {} # Empty dictionary that will contain only valid sequences
@@ -441,8 +394,13 @@ def SpotCoordinationSite(fasta_dict, mode):
         current_sequence =(sequence)
         current_sequence_list = list(current_sequence) # Split the sequence into a list
 
-        #logging.info("***** Checking sequence",sno,"under header:", header[1:],"*****")
-        if(SequenceValidityCheck(current_sequence_list) == 0): # Pass the list to the SequenceValidityCheck function
+        if len(current_sequence) <9:
+            mylog(logging.INFO, usrout, "The sequence is too short (minimum: 9)")
+            output[header] = {"result": {},
+                          "analysis": "\n".join(usrout),
+                          "fail": True,
+                          "warnings": ["The sequence is too short (minimum: 9 amino acids)"]}
+        elif (SequenceValidityCheck(current_sequence_list) == 0): # Pass the list to the SequenceValidityCheck function
             filtered_dict[header] = sequence # Add only the valid sequences to the new dictionary
         else:
             mylog(logging.INFO, usrout, "The following sequence(s) contains invalid characters other than the 20 standard amino acids")
@@ -454,10 +412,10 @@ def SpotCoordinationSite(fasta_dict, mode):
     if (len(fasta_dict) == len(filtered_dict)):
         mylog(logging.INFO, usrout, "NOTE : The sequence were verified to be valid !")
     else:
-        logging.info("---------------------")
-        logging.info(" INVALID SEQUENCE(S)")
-        logging.info("---------------------")
-        logging.info("NOTE : The following sequence(s) contains invalid characters other than the 20 standard amino acids \n")
+        #logging.info("---------------------")
+        #logging.info(" INVALID SEQUENCE(S)")
+        #logging.info("---------------------")
+        #logging.info("NOTE : The following sequence(s) contains invalid characters other than the 20 standard amino acids \n")
         mylog(logging.INFO, usrout, "%s\n%s"%(header[1:],"\n".join(fasta.break_fasta_sequence(sequence))))
 
 
@@ -493,7 +451,7 @@ def SpotCoordinationSite(fasta_dict, mode):
         #1102 convert to dict
         wesa_substr_index_list = [] # List containing indices of the starting positions of the 9mers for comparison with the WESA output
         out_coord_atoms = {} # The output of the function for the current sequence
-        output[header] = {"warnings": [], "result": {}, "analysis": "", "fail": False} # initialize the new rich dictionary
+        output[header] = {"warnings": [], "result": {}, "analysis": "", "fail": False} # initialize the new informative dictionary
         cys_count = 0
         his_count = 0
         tyr_count = 0
@@ -541,9 +499,9 @@ def SpotCoordinationSite(fasta_dict, mode):
             #######################
             # Check for CP motifs #
             #######################
-            logging.info("CP MOTIF CHECK:")
-            logging.info("-" * 35)
-            logging.info("NOTE : Screening all Cysteine Proline motifs")
+            #logging.info("CP MOTIF CHECK:")
+            #logging.info("-" * 35)
+            #logging.info("NOTE : Screening all Cysteine Proline motifs")
 
 
             cp_motif = {} # This dictionary will skip basic adjacency
@@ -633,14 +591,13 @@ def SpotCoordinationSite(fasta_dict, mode):
                 mylog(logging.INFO, usrout, "NOTE : It is very likely that this sequence does not bind/coordinate heme !")
                 output[header]["warnings"] += ["No coordination sites passed the net charge check.",                                                "It is very likely that this sequence does not bind/coordinate heme"]
                 continue
-            #logging.info("\n")
 
             ###################
             # Spacer distance #
             ###################
-            logging.info("-" * 50)
-            logging.info("SPACER DISTANCE CHECK")
-            logging.info("-" * 50)
+            #logging.info("-" * 50)
+            #logging.info("SPACER DISTANCE CHECK")
+            #logging.info("-" * 50)
             for head in pass_charge_dict: # Iterate through this dictionary
                 pass_charge_index_list.append(int(head[1:])) # append to the pass_charge_index_list only the number from the dictionary header eg. in C23 extract 23 and convert it to 'int'
             pass_charge_index_list.sort()
@@ -662,11 +619,11 @@ def SpotCoordinationSite(fasta_dict, mode):
                         else:
                             spacer_dict[pass_charge_index_list[i]] = "NO"
             else:
-                logging.info("NOTE : Only one 9mer to check meaning only one valid coordination site")
-                logging.info("NOTE : Spacer check will be skipped")
+                #logging.info("NOTE : Only one 9mer to check meaning only one valid coordination site")
+                #logging.info("NOTE : Spacer check will be skipped")
                 spacer_dict[int(pass_charge_index_list[0])] = "NO" # position of the only valid aa in the chain is NO
             spacer_check_pass = list(spacer_dict.values()).count("YES")
-            logging.info("NOTE : "+str(spacer_check_pass)+" out of "+str( len(pass_charge_index_list))+ " PASS the spacer check!")
+            #logging.info("NOTE : "+str(spacer_check_pass)+" out of "+str( len(pass_charge_index_list))+ " PASS the spacer check!")
 
             ######################
             # WESA Compatibility #
@@ -678,7 +635,8 @@ def SpotCoordinationSite(fasta_dict, mode):
                 logging.warning("Structure prediction by the WESA server supports sequences with"+
                                 " length up to %d amino acids"%MAX_SEQ_LENGTH_FOR_WESA)
                 logging.warning("The current sequence has %d a.a. and is not supported."%current_sequence_length)
-                output[header]["warnings"] += ["Structure prediction by the WESA server supports sequences with"+                                                " length up to %d amino acids\n"%(MAX_SEQ_LENGTH_FOR_WESA)]
+                output[header]["warnings"] += ["Structure prediction by the WESA server supports sequences with"+
+                                               " length up to %d amino acids\n"%(MAX_SEQ_LENGTH_FOR_WESA)]
                 output[header]["warnings"] += ["The current sequence has %d a.a. and is not supported."%current_sequence_length]
 
             ##########################
@@ -739,8 +697,8 @@ def SpotCoordinationSite(fasta_dict, mode):
                                 else:
                                     wesa_spacer_dict[pass_wesa_index_list[i]] = "NO"
                     else:
-                        logging.info("NOTE : Only one 9mer to check meaning only one valid coordination site")
-                        logging.info("NOTE : Spacer check will be skipped")
+                        #logging.info("NOTE : Only one 9mer to check meaning only one valid coordination site")
+                        #logging.info("NOTE : Spacer check will be skipped")
                         wesa_spacer_dict[pass_wesa_index_list[0]] = "NO" # position of the only valid aa in the chain is NO
                     # table = PrettyTable(["S.no", "Coordinating residue", "9mer motif", "Net charge", "Spacer > 2", "Binding"])
                     table = PrettyTable(["S.no", "Coordinating residue", "9mer motif", "Net charge", "Comment"])
@@ -772,8 +730,8 @@ def SpotCoordinationSite(fasta_dict, mode):
                 mylog(logging.INFO, usrout, "NOTE : The sequence does not have potential heme coordination sites(C, H, Y) !!")
                 mylog(logging.INFO, usrout, "NOTE : It is very likely that this sequence does not bind/coordinate heme !")
                 mylog(logging.INFO, usrout, "NOTE : This is the only sequence on the file...nothing more to check !")
-                logging.info("-" * 80)
-                logging.info("PROGRAM WILL EXIT NOW !!")
+                #logging.info("-" * 80)
+                #logging.info("PROGRAM WILL EXIT NOW !!")
                 # TODO Edit the message?
                 output[header]["warnings"] += ["The sequence does not have potential heme coordination sites(C, H, Y) "]
                 output[header]["warnings"] += ["It is very likely that this sequence does not bind/coordinate heme"]
@@ -784,8 +742,8 @@ def SpotCoordinationSite(fasta_dict, mode):
                     mylog(logging.INFO, usrout, "NOTE : It is very likely that this sequence does not bind/coordinate heme !")
                     mylog(logging.INFO, usrout, "NOTE : The sequence does not have potential heme coordination sites(C, H, Y) !!")
                     mylog(logging.INFO, usrout, "NOTE : This is the last sequence on the file...nothing more to check !!")
-                    logging.info("-" * 80)
-                    logging.info("PROGRAM WILL EXIT NOW !!")
+                    #logging.info("-" * 80)
+                    #logging.info("PROGRAM WILL EXIT NOW !!")
                     # CalcExecTime(start)
                     output[header]["warnings"] += ["The sequence does not have potential heme coordination sites(C, H, Y) "]
                     output[header]["warnings"] += ["It is very likely that this sequence does not bind/coordinate heme"]
@@ -793,7 +751,7 @@ def SpotCoordinationSite(fasta_dict, mode):
                 mylog(logging.INFO, usrout, "-" * 80) # Any sequence before the last sequence
                 mylog(logging.INFO, usrout, "NOTE : It is very likely that this sequence does not bind/coordinate heme")
                 mylog(logging.INFO, usrout, "NOTE : The sequence does not have potential heme coordination sites(C, H, Y), checking the next valid sequence !")
-                logging.info("NOTE : Nothing more to check..moving to the next valid sequece !!")
+                #logging.info("NOTE : Nothing more to check..moving to the next valid sequece !!")
                 output[header]["warnings"] += ["The sequence does not have potential heme coordination sites(C, H, Y) "]
                 output[header]["warnings"] += ["It is very likely that this sequence does not bind/coordinate heme"]
                 mylog(logging.INFO, usrout, "-" * 80)
@@ -811,17 +769,17 @@ if (__name__ == "__main__"):
     if (sys.argv[0].endswith("ipykernel_launcher.py")):
         # running from notebook for testing
         scriptname = "Seq-HBM"
-        logging.info('*'*80)
-        logging.info(scriptname+" v0.12")
-        logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
-        logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
-        logging.info('*'*80)
+        #logging.info('*'*80)
+        #logging.info(scriptname+" v0.12")
+        #logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
+        #logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
+        #logging.info('*'*80)
         input_file_path = "/home/imhof_team/Public/mauricio/workflow/"
         input_file_name = "test.fasta"
         operation_mode = "structure"
         if(os.path.isfile(os.path.join(input_file_path,input_file_name))): #Check if the file exists
             fo=os.path.join(input_file_path,input_file_name)
-            logging.info("NOTE : Your input file is: "+ input_file_name)
+            #logging.info("NOTE : Your input file is: "+ input_file_name)
         else:
             logging.error("\nINPUT FILE MISSING ! EXITING NOW !")
             CalcExecTime(start)
@@ -829,11 +787,11 @@ if (__name__ == "__main__"):
     else:
         ##################################################
         scriptname = os.path.basename(__file__)
-        logging.info('*'*80)
-        logging.info(scriptname+" v0.12")
-        logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
-        logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
-        logging.info('*'*80)
+        #logging.info('*'*80)
+        #logging.info(scriptname+" v0.12")
+        #logging.info("SeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs")
+        #logging.info(datetime.datetime.today().strftime("%A , %B-%d-%Y, %H:%M:%S"))
+        #logging.info('*'*80)
         #################################################
         if (len(sys.argv)<3 or (sys.argv[2] not in ["wesa","structure"])):
             logging.error("TOO FEW or INCORRECT command line arguments !")
@@ -847,13 +805,13 @@ if (__name__ == "__main__"):
             sys.exit()
         #File Path
         input_file_path = os.path.dirname(os.path.realpath(__file__))
-        logging.info(input_file_path)
+        #logging.info(input_file_path)
         input_file_name=sys.argv[1]
         operation_mode=sys.argv[2]
 
         if(os.path.isfile(os.path.join(input_file_path,input_file_name))): #Check if the file exists
             fo=os.path.join(input_file_path,input_file_name)
-            logging.info("NOTE : Your input file is: "+input_file_name)
+            #logging.info("NOTE : Your input file is: "+input_file_name)
         else:
             logging.error("\nINPUT FILE MISSING ! EXITING NOW !")
             CalcExecTime(start)
