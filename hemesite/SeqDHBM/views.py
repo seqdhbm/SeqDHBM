@@ -78,7 +78,7 @@ def index(request):
             if email:
                 body = "You can access the analysis at http://localhost:8000/SeqDHBM/%d"%myjob.id
                 e_msg = EmailMessage(
-                    subject='SeqD-HBM: Your analysis number %(job)s'%myjob.id,
+                    subject=f'SeqD-HBM: Your analysis number {myjob.id}',
                     body=body,
                     from_email='seqdhbm@gmail.com',
                     to=[email],
