@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Module to work with fasta files
-# 
+#
 # ## Working with a fasta file containing multiple sequences
 
 # In[18]:
@@ -12,7 +12,7 @@ import sys, os
 
 def break_fasta_sequence(seq):
     assert type(seq)==str
-    return [seq[x:x+70] for x in range(0, len(seq), 70)]  
+    return [seq[x:x+70] for x in range(0, len(seq), 70)]
 
 def fasta_to_seq2(in_file, jobfolder="J0"):
     fullpath = os.path.join(jobfolder, in_file)
@@ -32,8 +32,8 @@ def fasta_to_seq2(in_file, jobfolder="J0"):
             # Header found
             if seq:   # if seq is empty, this might be the first line of the file
                 # get the first section of the header, hopefully the ID
-                result+= [{"name": head[1:], 
-                           "seq":seq, 
+                result+= [{"name": head[1:],
+                           "seq":seq,
                            "folder": os.path.join(jobfolder, "FF%05d"%seq_id),
                            "file": "%d.fasta"%(seq_id),
                            "submited_as": "Fasta file"}]
@@ -42,11 +42,11 @@ def fasta_to_seq2(in_file, jobfolder="J0"):
             head=i
         else: # not a header - append to sequnce
             seq+=i
-    if seq and head: 
-        # after finishing reading the file, check if there is a sequence in the 
+    if seq and head:
+        # after finishing reading the file, check if there is a sequence in the
         # variable and add it to the dictionary accordingly.
-        result+= [{"name": head[1:], 
-                   "seq":seq, 
+        result+= [{"name": head[1:],
+                   "seq":seq,
                    "folder": os.path.join(jobfolder, "FF%05d"%seq_id),
                    "file": "%d.fasta"%(seq_id),
                    "submited_as": "Fasta file"}]
@@ -56,9 +56,10 @@ def fasta_to_seq2(in_file, jobfolder="J0"):
 
 def organize_sequences2(seq_list):
     """Creates separated fasta files organized in folders from a single fasta file with multiple sequences.
-    
+
     Keyword arguments:
     in_file -- Original fasta file."""
+    print("debugging")
     for k in seq_list:
         os.makedirs(k["folder"], exist_ok=True)
         file = os.path.join(k["folder"], k["file"])
@@ -67,7 +68,7 @@ def organize_sequences2(seq_list):
             lines=break_fasta_sequence(k["seq"])
             f.write('\n'.join(lines))
             f.write('\n')
-            
+
 
 
 # In[23]:
@@ -84,7 +85,7 @@ if (__name__ == "__main__"):
 
 '''def fasta_to_seq(in_file):
     """ Parses a fasta file with multiple sequences and creates a dictionary out of the records.
-    
+
     Returns a dictionary of sequences: The dictionary key
     will be the folder name and the values
     are tuples containing the full header and the sequence"""
@@ -111,8 +112,8 @@ if (__name__ == "__main__"):
             head=i
         else: # not a header - append to sequnce
             seq+=i
-    if seq: 
-        # after finishing reading the file, check if there is a sequence in the 
+    if seq:
+        # after finishing reading the file, check if there is a sequence in the
         # variable and add it to the dictionary accordingly.
         outfile=head[1:].split('|')[1]+'('+ str(len(seq))+')'
         cnt=1
@@ -121,11 +122,11 @@ if (__name__ == "__main__"):
             cnt+=1
         seq_dict[outfile]=(head, seq)
     return seq_dict''';
-   
+
 '''
 def organize_sequences(seq_dict):
     """Creates separated fasta files organized in folders from a single fasta file with multiple sequences.
-    
+
     Keyword arguments:
     in_file -- Original fasta file."""
     for k, (h, s) in seq_dict.items():
@@ -138,7 +139,3 @@ def organize_sequences(seq_dict):
 
 
 # In[10]:
-
-
-
-

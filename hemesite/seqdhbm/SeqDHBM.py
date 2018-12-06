@@ -456,6 +456,7 @@ def SpotCoordinationSite(fasta_dict, mode):
         his_count = 0
         tyr_count = 0
         sno += 1
+        
         ###############################
         # Check for coodinating sites #
         ###############################
@@ -541,7 +542,8 @@ def SpotCoordinationSite(fasta_dict, mode):
                 mylog(logging.INFO, usrout, "NOTE : None of the 9mers have valid motifs")
                 mylog(logging.INFO, usrout, "NOTE : The likelyhood of any part of this sequence binding or coordinating heme is very low !!!")
                 mylog(logging.INFO, usrout, "NOTE : Checking the next valid sequence")
-                output[header]["warnings"] += ["None of the 9mers have valid motifs.",                                                "The likelyhood of any part of this sequence binding or coordinating heme is very low"]
+                output[header]["warnings"] += ["None of the 9mers have valid motifs.",
+                                               "The likelyhood of any part of this sequence binding or coordinating heme is very low"]
                 output[header]["fail"] = False
                 mylog(logging.INFO, usrout, "-" * 50)
                 mylog(logging.INFO, usrout, "-" * 50)
@@ -758,13 +760,7 @@ def SpotCoordinationSite(fasta_dict, mode):
     return output
 
 
-
-
-# # Run the code
-
-# In[13]:
-
-
+'''
 if (__name__ == "__main__"):
     if (sys.argv[0].endswith("ipykernel_launcher.py")):
         # running from notebook for testing
@@ -820,3 +816,4 @@ if (__name__ == "__main__"):
     for h, s in ReadFasta(fo).items():
         SpotCoordinationSite({h:s}, operation_mode)
     CalcExecTime(start)
+'''

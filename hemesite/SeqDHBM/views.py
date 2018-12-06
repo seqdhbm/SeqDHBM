@@ -1,30 +1,27 @@
-from django.http import HttpResponse
-from django.template import loader
+from __future__ import absolute_import, unicode_literals
+from django.conf import settings
 from django.core.mail import EmailMessage
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, get_list_or_404, redirect
+from django.template import loader
 from .forms import SeqSubmission
 import seqdhbm.workflow as wf
 from SeqDHBM import models
-from django.conf import settings
-from django.shortcuts import get_object_or_404, get_list_or_404, redirect
+
 import os
 
-# TODO discuss with Ajay about how to protect the results
-# Read about Celery
-# # http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html
-# # http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html#first-steps
+# TODO use the timestamp to protect the results
 # TODO read about security: https://docs.djangoproject.com/en/2.1/topics/security/#user-uploaded-content-security
-# TODO fix a bug in fasta.fasta_to_seq2 when the user gives an non fasta file. ok
-# TODO should I have a webpage with the results? can i redirect back to the main page on error?
 # TODO NEXT: Database
+#            -  WESA queue
+#            -  Save to database via celery
 #            -  Create jobs ok
 #            -  save the submission ok
-#            -  WESA queue
 #            -  save the results ok
 #            -  make the results accessisble ok
 # TODO check a service to verify if the email belongs to an academic institution
-# worklog: Fri Nov16th: 9:30 - 12:00; 13:00 - 18:30
-#          Thu Nov22nd: 10:00 - 12:00; 13:00 - 17:00; 17:30 - 20:15
-#          Fri Nov23rd: 9:15 - 13:00; 13:45 - 16:15; 16:45 -
+# Future: celery has a 'chain' function that might be handy to pipe the
+#    homology -> docking -> md process
 
 # TODO: put this function somewhere appropriate:
 def handle_uploaded_file(f, filename):
@@ -61,7 +58,6 @@ def index(request):
             rawseq = "".join(rawseq.split())
             rawseq = "".join(rawseq.split("\r"))
             result = wf.workflow(jobfolder=jobfolder, rawseq=rawseq, fastafile=fastafile, job=myjob)
-            print(result)
 
             ANALYSIS_HEADER = "*"*100
             ANALYSIS_HEADER += "\nSeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs\n"
@@ -105,7 +101,6 @@ def show_result(request, job_id):
     template = loader.get_template('SeqDHBM/result.html')
     job = get_object_or_404(models.Job, id=job_id)
     seqs = get_list_or_404(models.Sequence, jobnum=job)
-    print (job)
     res = {}
     for seq in seqs:
         res[seq] = [seq.seqchain[x:x+70] for x in range(0, len(seq.seqchain), 70)]

@@ -162,7 +162,8 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode
 
                 # Output? Save in our user output?
                 item["result"] = analysedSeq["result"]
-                for coord, res in analysedSeq["result"].items():
+                tasks.assync_save_results.delay(seq_obj.id, analysedSeq["result"])
+                '''for coord, res in analysedSeq["result"].items():
                     res_obj = models.Result_HBM(
                         sequence = seq_obj,
                         coord_atom = coord,
@@ -170,7 +171,7 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode
                         net_charge = res['netcharge'],
                         disulfide_possible = bool(res['comment'].strip())
                     )
-                    res_obj.save()
+                    res_obj.save()'''
                 item["analysis"] = analysedSeq["analysis"]
                 item["warnings"] = analysedSeq["warnings"]
                 seq_obj.warnings_hbm = "\n".join(analysedSeq["warnings"])
