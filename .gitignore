@@ -4,6 +4,9 @@
 # Files created by the application
 .csv
 hemesite/jobs/
+hemesite/wesa/*.out
+hemesite/wesa/*.html
+hemesite/wesa/*.txt
 workflow/seqdhbm/
 pass.env
 
@@ -14,6 +17,7 @@ pass.env
 __pycache__/
 local_settings.py
 db.sqlite3
+results.sqlite
 media
 
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/

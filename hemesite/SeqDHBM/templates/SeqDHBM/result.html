@@ -7,9 +7,14 @@ table, th, td {
 </style> <!-- TODO Put the style for the table in a CSS -->
 </head>
 <div>
-  <a href="/SeqDHBM/"> << Back to main page</a>
+  <a href="{% url 'index' %}"> << Back to main page</a>
   <h2>SeqD-HBM heme binding prediction report for the submission of number {{ job.id }}</h2>
   <p>Submitted at {{ job.submission_date }}</p>
+  {% if processing > 0 %}
+    <h3>Note:</h3>
+    <p>There are still {{ processing }} sequences being processed by our server.</p>
+    <p>Refresh this page or access <a href="{% url 'result' job.id %}">this link</a> later </p>
+  {% endif %}
   {% if failed %}
     <h3>The following sequence(s) could not be processed: </h3>
     {% for seq, seqchain in failed.items %}

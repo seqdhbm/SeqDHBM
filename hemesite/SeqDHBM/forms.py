@@ -15,7 +15,7 @@ class SeqSubmission(forms.Form):
                              required=False)
     CHOICES = [('structure','Skip'),
                ('wesa','Predict')]
-    mode = forms.ChoiceField(label="WESA?:", choices=CHOICES, disabled= True, initial="structure", widget=forms.RadioSelect())
+    mode = forms.ChoiceField(label="WESA?:", choices=CHOICES, initial="structure", widget=forms.RadioSelect())
 
     def clean(self):
         cleaned_data = super().clean()
@@ -29,4 +29,5 @@ class SeqSubmission(forms.Form):
          self.add_error("rawseq", "Note: For processing multiple sequences, please use the file upload functionality")
         # i can check if the email is empty for WESA here
         if (not cleaned_data.get("email")) and cleaned_data.get("mode") == "wesa":
-            self.add_error("email", "Email is mandatory when using WESA predictions")
+            pass
+            # self.add_error("email", "Email is mandatory when using WESA predictions")

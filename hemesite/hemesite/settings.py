@@ -37,9 +37,9 @@ CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = "UTC"
+CELERY_ENABLE_UTC = True
 CELERY_IMPORTS = ['seqdhbm']
-#CELERY_ROUTES = {'SeqDHBM.tasks.assync_organize_seq': {'queue': 'files'}}
-
 
 
 # Quick-start development settings - unsuitable for production
@@ -59,6 +59,7 @@ ALLOWED_HOSTS = ["131.220.127.75", "131.220.127.81", "127.0.0.1", "localhost"]
 INSTALLED_APPS = [
     'SeqDHBM.apps.SeqdhbmConfig',
     'django.contrib.admin',
+    'django_celery_beat',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

@@ -13,9 +13,15 @@ app = Celery('hemesite')
 #   should have a `CELERY_` prefix.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
+app.conf.beat_schedule = {
+    "Take_results_from_WESA": {
+        "task": "check_wesa_server",
+        "schedule": 30
+    }
+}
+
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
-
 
 @app.task(bind=True)
 def debug_task(self):

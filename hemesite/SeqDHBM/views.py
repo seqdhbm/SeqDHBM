@@ -7,27 +7,36 @@ from django.template import loader
 from .forms import SeqSubmission
 import seqdhbm.workflow as wf
 from SeqDHBM import models
-
 import os
 
-# TODO use the timestamp to protect the results
-# TODO read about security: https://docs.djangoproject.com/en/2.1/topics/security/#user-uploaded-content-security
+# DOING tasks.check_for_pending_sequences
+# TODO validate if the email is filled if wesa is used
 # TODO NEXT: Database
 #            -  WESA queue
-#            -  Save to database via celery
+#                -  One function to send to wesa
+#                -  One function (scheduled) to check if there are pending jobs
+#                -  Update fields in tables job and Sequence to control pending
+# DONE:
+#            -  Save to database via celery ok
 #            -  Create jobs ok
 #            -  save the submission ok
 #            -  save the results ok
 #            -  make the results accessisble ok
-# TODO check a service to verify if the email belongs to an academic institution
 # Future: celery has a 'chain' function that might be handy to pipe the
 #    homology -> docking -> md process
+# Future: use the timestamp to protect the results
+# Future: read about security: https://docs.djangoproject.com/en/2.1/topics/security/#user-uploaded-content-security
+# Future: check a service to verify if the email belongs to an academic institution
+
 
 # TODO: put this function somewhere appropriate:
 def handle_uploaded_file(f, filename):
+    """Necessary for receiving files from the user (POST method)."""
+
     with open(filename, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
+
 
 def index(request):
     result = []
@@ -57,7 +66,13 @@ def index(request):
             rawseq = "".join(form.cleaned_data['rawseq'].split("\n"))
             rawseq = "".join(rawseq.split())
             rawseq = "".join(rawseq.split("\r"))
-            result = wf.workflow(jobfolder=jobfolder, rawseq=rawseq, fastafile=fastafile, job=myjob)
+
+            result = wf.workflow(jobfolder=jobfolder,
+                                 rawseq=rawseq,
+                                 fastafile=fastafile,
+                                 job=myjob,
+                                 mode=form.cleaned_data["mode"]
+                                 )
 
             ANALYSIS_HEADER = "*"*100
             ANALYSIS_HEADER += "\nSeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs\n"
@@ -78,9 +93,6 @@ def index(request):
                     body=body,
                     from_email='seqdhbm@gmail.com',
                     to=[email],
-                    # connection: An email backend instance. Use this parameter
-                    # if you want to use the same connection for multiple messages.
-                    # If omitted, a new connection is created when send() is called.
                     headers={'Message-ID': 'foo'},
                 )
                 e_msg.send(fail_silently=False)
@@ -106,8 +118,9 @@ def show_result(request, job_id):
         res[seq] = [seq.seqchain[x:x+70] for x in range(0, len(seq.seqchain), 70)]
     context = {
         "job": job,
-        "result": {x:y for x,y in res.items() if x.status_hbm not in [models.Sequence.STATUS_FAILED, models.Sequence.STATUS_SKIPPED] },
-        "failed": {x:y for x,y in res.items() if x.status_hbm == models.Sequence.STATUS_FAILED}
+        "processing": len([x for x in seqs if x.status_hbm==models.Sequence.STATUS_QUEUED]),
+        "result": { x:y for x,y in res.items() if x.status_hbm ==models.Sequence.STATUS_PROCESSED },
+        "failed": { x:y for x,y in res.items() if x.status_hbm == models.Sequence.STATUS_FAILED }
     }
     return HttpResponse(template.render(context, request))
 
@@ -133,46 +146,3 @@ def hemewf(request):
         message+="<p>Sequence num: %d</p>"%res.sequence.id
         message+="<p>Coord atom: %s</p>"%res.coord_atom
     return HttpResponse(message)
-
-
-"""    message=""
-    rawseq  = request.GET.get('aaseq')
-    result_list = wf.workflow(rawseq=rawseq)#fastafile="/home/imhof_team/Public/mauricio/workflow/test.fasta")#
-    try:
-        for result in result_list:
-            message += "<h3>%s</h3>"%result["name"]
-            message += "<font face= 'Courier New'>"
-            for i in range(0, len(result["seq"]), 70):
-                message += "<p>%s</p>"%result["seq"][i:i+70]
-            message += "</font>"
-            if result["fail"]:
-                message += "<font color='FF0000'><b>"
-            for warn in result["warnings"]:
-                message += "<p>%s</p>"%warn
-            if result["fail"]:
-                message += "</b></font>"
-            if result["result"]:
-                message += "<table>"
-                message += ""<tr>
-                        <th>Num</th>
-                        <th>Coord. residue</th>
-                        <th>9mer motif</th>
-                        <th>Net charge</th>
-                        <th>Comment</th></tr>""
-                line_num = 0
-                for coord_atom, atom_data in sorted(result["result"].items(), key = lambda x: int(x[0][1:])):
-                    line_num+=1
-                    message += "<tr>"
-                    message += "<td>%d</td>"%line_num
-                    message += "<td>%s</td>"%coord_atom
-                    # TODO should I move the style to a css?
-                    message += "<td><font face= 'Courier New'>%s</font></td>"%atom_data["ninemer"]
-                    message += "<td>%s</td>"%atom_data["netcharge"]
-                    message += "<td>%s</td>"%atom_data["comment"]
-                    message += "</tr>"
-                message += "</table>"
-    except Exception as e:
-        message += str(e)
-
-    return HttpResponse((message if message else "You submitted nothing!"))
-"""

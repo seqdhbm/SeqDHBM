@@ -1,0 +1,10 @@
+echo "This will delete all previous records! Every record will be deleted!!"
+echo "If you are sure, copy and paste the following lines in the CLI"
+echo "    rm results.sqlite"
+echo "    rm db.sqlite3"
+echo "    rm wesa/*.out"
+echo "    rm wesa/*.html"
+echo "    rm wesa/*.txt"
+echo "    rm -R jobs"
+echo "    python manage.py migrate"
+echo

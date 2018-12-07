@@ -4,17 +4,13 @@
 # In[3]:
 
 
-import logging
-OUTPUT_FILE = "output_yeast_structure.csv"
-INPUT_FILE = '/home/imhof_team/Public/mauricio/workflow/yeast_type3/yeast_type3_safe2.fasta'
-
 from . import fasta, pdbfiles, SeqDHBM
+import logging
+import os
 from SeqDHBM import models, tasks
-import sys, os
 import shutil
+import sys
 import time
-
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s - %(message)s')
 
 def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode="structure", job=None):
     """ Runs the workflow
@@ -132,7 +128,7 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode
     cnt_progress = 0
     seq_dict = {}
     for item in seq_list:
-        try:
+        # try:
             # TODO: SAVE HERE?
             seq_obj = None # model object
             if job:
@@ -145,40 +141,41 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode
                 elif (item["submited_as"] == "PDB id"):
                     _sub = models.Sequence.SUB_PDB_ID
                 _stat = models.Sequence.STATUS_FAILED if "fail" in item else models.Sequence.STATUS_QUEUED
-                seq_obj = models.Sequence(jobnum=job, seqchain=item['seq'], submittedas=_sub,
+                seq_obj = models.Sequence(jobnum=job,
+                                          seqchain=item['seq'],
+                                          submittedas=_sub,
                                           mode=models.Sequence.WESA_MODE if mode=="wesa" else models.Sequence.STRUCTURE_MODE,
-                                          header = item["name"], status_hbm=_stat,
-                                          fasta_file_location=os.path.join(item["folder"], item["file"]))
+                                          header = item["name"],
+                                          status_hbm=_stat,
+                                          fasta_file_location=os.path.join(
+                                            item["folder"],
+                                            item["file"])
+                                            )
                 seq_obj.save()
-            # test if this is a record of an error
-            if not "fail" in item:
-                analysis = SeqDHBM.SpotCoordinationSite({">"+item["name"]: item["seq"]}, mode)
-                analysedSeq = analysis[">" + item["name"]]
-                # TODO: check fail in item
-                if job and ("fail" in analysedSeq) and (analysedSeq["fail"]):
-                    seq_obj.status_hbm = models.Sequence.STATUS_FAILED
-                else:
-                    seq_obj.status_hbm = models.Sequence.STATUS_PROCESSED
 
-                # Output? Save in our user output?
+            # Test if there is an input error
+            if not "fail" in item:
+                analysis = SeqDHBM.SpotCoordinationSite(
+                    {">"+item["name"]: item["seq"]},
+                    seq_obj.id,
+                    mode
+                    )
+                analysedSeq = analysis[">" + item["name"]]
+                # TODO: SET TO RECEIVED NOW AND TO PROCESSED AFTER THE
+                # RESULTS ARE SAVED
+                if ("fail" in analysedSeq) and (analysedSeq["fail"]):
+                    seq_obj.status_hbm = models.Sequence.STATUS_FAILED
+                seq_obj.partial_hbm_analysis = analysedSeq["analysis"]
+
                 item["result"] = analysedSeq["result"]
                 tasks.assync_save_results.delay(seq_obj.id, analysedSeq["result"])
-                '''for coord, res in analysedSeq["result"].items():
-                    res_obj = models.Result_HBM(
-                        sequence = seq_obj,
-                        coord_atom = coord,
-                        ninemer = res["ninemer"],
-                        net_charge = res['netcharge'],
-                        disulfide_possible = bool(res['comment'].strip())
-                    )
-                    res_obj.save()'''
                 item["analysis"] = analysedSeq["analysis"]
                 item["warnings"] = analysedSeq["warnings"]
                 seq_obj.warnings_hbm = "\n".join(analysedSeq["warnings"])
                 seq_obj.save()
                 cnt_progress+=1
 
-        except Exception as e:
+    """    except Exception as e:
             logging.error("****")
             logging.error("Sequence name:%s \n %s"%(item["name"], item["file"]))
             logging.error(type(e))
@@ -187,6 +184,5 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=[], pdbid="", rawseq="", mode
             logging.error("****")
         finally:
             logging.debug("Got the results for %s"%item["name"])
-            logging.debug("%d out of %d complete"%(cnt_progress, len(seq_dict)))
-
+            logging.debug("%d out of %d complete"%(cnt_progress, len(seq_dict)))"""
     return seq_list
