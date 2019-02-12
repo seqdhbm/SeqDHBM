@@ -1,11 +1,30 @@
 from django.db import models
 from django.conf import settings
 
+
 # Create your models here.
 class Job(models.Model):
     submittedby = models.EmailField(max_length=254, blank=True)
     submission_date = models.DateTimeField(auto_now_add=True)
     full_hbm_analysis = models.TextField(blank=True)
+
+    def set_full_hbm_analysis(self, lines: list = None):
+        description = "*"*100
+        description += "\nSeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs\n"
+        description += self.submission_date.strftime("%A , %B-%d-%Y, %H:%M:%S")
+        description += f"\nJob number {self.id}\n"
+        if lines:  # only if mode == structure
+            description += f"Full analysis report\n{'*'*100}\n\n"
+            description += "\n\n\n".join(lines)
+        else:
+            sequences = models.Sequence.objects.get(jobnum=self)
+            filtered = [x for x in sequences if x.status_hbm != Sequence.STATUS_QUEUED]
+            description += f"\n{len(filtered)} out of {len(sequences)} processed\n{'*'*100}\n\n"
+            for seq in filtered:
+                description += seq.partial_hbm_analysis + "\n\n\n"
+        self.full_hbm_analysis = description
+        self.save()
+
 
 class Sequence(models.Model):
     # choices for form of submission
@@ -13,6 +32,7 @@ class Sequence(models.Model):
     SUB_FASTA_FILE = "F"
     SUB_PDB_FILE = "P"
     SUB_PDB_ID = "I"
+    # SUB_CURATED = "C"
     SUBMISSION_FORMS = ((SUB_MANUAL_INPUT, "Manual Input"), (SUB_PDB_ID, "PDB Id"),
                         (SUB_FASTA_FILE, "Fasta File"), (SUB_PDB_FILE, "PDB File"))
 
@@ -30,6 +50,7 @@ class Sequence(models.Model):
               (STATUS_PROCESSED, "Processed"),
               (STATUS_FAILED, "Failed"),
               (STATUS_SKIPPED, "Skipped"))
+
     # Fields
     jobnum = models.ForeignKey(
         Job,
@@ -51,9 +72,10 @@ class Sequence(models.Model):
         allow_folders=False
         )
     # pdb_file_location = models.FilePathField(path=BASE_DIR, allow_files=True, allow_folders=False)
-    warnings_hbm = models.TextField(blank= True)
+    warnings_hbm = models.TextField(blank=True)
 
-class Result_HBM(models.Model): # Result_HBM
+
+class Result_HBM(models.Model):  # Result_HBM
     sequence = models.ForeignKey(
         Sequence,
         on_delete=models.CASCADE,

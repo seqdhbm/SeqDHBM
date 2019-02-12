@@ -40,7 +40,7 @@ def handle_uploaded_file(f, filename):
 
 def index(request):
     result = []
-    debugging=""
+    debugging = ""
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
@@ -51,9 +51,9 @@ def index(request):
         if form.is_valid():
             email = form.cleaned_data['email'] if form.cleaned_data['email'] else ""
             # Create the job in the database
-            myjob = models.Job(submittedby= email)
+            myjob = models.Job(submittedby=email)
             myjob.save()
-            jobfolder = os.path.join(settings.BASE_DIR, "jobs/J%07d/"%myjob.id)
+            jobfolder = os.path.join(settings.BASE_DIR, "jobs/J%07d/" % myjob.id)
             os.makedirs(jobfolder, exist_ok=True)
             # obtain the fastafile
             if "fastafiles" in request.FILES:
@@ -74,20 +74,13 @@ def index(request):
                                  mode=form.cleaned_data["mode"]
                                  )
 
-            ANALYSIS_HEADER = "*"*100
-            ANALYSIS_HEADER += "\nSeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs\n"
-            ANALYSIS_HEADER += myjob.submission_date.strftime("%A , %B-%d-%Y, %H:%M:%S")
-            ANALYSIS_HEADER += "\nJob number %d\n"%myjob.id
-            ANALYSIS_HEADER += "Full analysis report\n" +("*"*100)+ "\n\n"
-
-            myjob.full_hbm_analysis = ANALYSIS_HEADER + "\n\n\n".join([x["analysis"] for x in result])
-            myjob.save()
+            myjob.set_full_hbm_analysis([x["analysis"] for x in result])
 
             # if all went well, send the email to the user
             # https://docs.djangoproject.com/en/2.1/topics/email/#django.core.mail.EmailMessage
             email = form.cleaned_data['email']
             if email:
-                body = "You can access the analysis at http://localhost:8000/SeqDHBM/%d"%myjob.id
+                body = "You can access the analysis at http://localhost:8000/SeqDHBM/%d" % myjob.id
                 e_msg = EmailMessage(
                     subject=f'SeqD-HBM: Your analysis number {myjob.id}',
                     body=body,
@@ -96,7 +89,7 @@ def index(request):
                     headers={'Message-ID': 'foo'},
                 )
                 e_msg.send(fail_silently=False)
-            return redirect("%d/"%myjob.id)
+            return redirect("%d/" % myjob.id)
     # if a GET (or any other method) we'll create a blank form
     else:
         form = SeqSubmission()
@@ -109,6 +102,7 @@ def index(request):
     }
     return HttpResponse(template.render(context, request))
 
+
 def show_result(request, job_id):
     template = loader.get_template('SeqDHBM/result.html')
     job = get_object_or_404(models.Job, id=job_id)
@@ -118,9 +112,9 @@ def show_result(request, job_id):
         res[seq] = [seq.seqchain[x:x+70] for x in range(0, len(seq.seqchain), 70)]
     context = {
         "job": job,
-        "processing": len([x for x in seqs if x.status_hbm==models.Sequence.STATUS_QUEUED]),
-        "result": { x:y for x,y in res.items() if x.status_hbm ==models.Sequence.STATUS_PROCESSED },
-        "failed": { x:y for x,y in res.items() if x.status_hbm == models.Sequence.STATUS_FAILED }
+        "processing": len([x for x in seqs if x.status_hbm == models.Sequence.STATUS_QUEUED]),
+        "result": {x: y for x, y in res.items() if x.status_hbm == models.Sequence.STATUS_PROCESSED},
+        "failed": {x: y for x, y in res.items() if x.status_hbm == models.Sequence.STATUS_FAILED}
     }
     return HttpResponse(template.render(context, request))
 

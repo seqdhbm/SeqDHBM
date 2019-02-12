@@ -51,6 +51,7 @@ table, th, td {
             <th>9mer motif</th>
             <th>Net charge</th>
             <th>Comment</th>
+            <th>Kd or strength</th>
           </tr>
           {% for res in seq.result_hbm_set.all %}
             <tr>
@@ -61,7 +62,8 @@ table, th, td {
               <td>{% if res.disulfide_possible %}
                 Possible S-S bond
               {% endif %}
-              </td>
+              </td></td>
+              <td>
             </tr>
           {% endfor %}
         </table>

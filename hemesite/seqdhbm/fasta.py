@@ -36,7 +36,7 @@ def fasta_to_seq2(in_file, jobfolder="J0"):
                            "seq":seq,
                            "folder": os.path.join(jobfolder, "FF%05d"%seq_id),
                            "file": "%d.fasta"%(seq_id),
-                           "submited_as": "Fasta file"}]
+                           "submitted_as": "Fasta file"}]
                 seq_id+=1
                 seq=''
             head=i
@@ -49,7 +49,7 @@ def fasta_to_seq2(in_file, jobfolder="J0"):
                    "seq":seq,
                    "folder": os.path.join(jobfolder, "FF%05d"%seq_id),
                    "file": "%d.fasta"%(seq_id),
-                   "submited_as": "Fasta file"}]
+                   "submitted_as": "Fasta file"}]
     return result
 
 
