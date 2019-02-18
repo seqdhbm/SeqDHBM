@@ -70,19 +70,20 @@ def access_wesa(seq_idx):
     # check if the result is ready
     wesa_result = SeqDHBM.GetResultsFromWESA(seq_idx)
     if wesa_result:
+        print("wesa_result", wesa_result)
         print("tasks.py line 54ish: ", wesa_result)
-        for result in models.Result_HBM.filter(sequence=seq_idx):
+        for result in models.Result_HBM.objects.filter(sequence=seq_idx):
             # check if the coordinating aa is not exposed
+            print("result.coordatom", result.coord_atom)
             if not wesa_result[int(result.coord_atom[1:])]:
                 result.delete()
         seq_obj = models.Sequence.objects.get(pk=seq_idx)
 
-        # and add the warning if they are all buried
-        results = models.Result_HBM.filter(sequence=seq_idx)
+        results = models.Result_HBM.objects.filter(sequence=seq_idx)
         if results:  # Check if there is any ninemer left
-            results.sort(key=lambda x: x.coord_atom[1:])
+            # results.sort(key=lambda x: x.coord_atom[1:])
             table = PrettyTable(["S.no", "Coord. residue", "9mer motif", "Net charge", "Comment", "Kd or strength"])
-            for pos, record in enumerate(results):
+            for pos, record in enumerate(sorted(results, key=lambda x: x.coord_atom[1:])):
                 table.add_row([pos+1,
                                record.coord_atom,
                                record.ninemer,
@@ -91,6 +92,7 @@ def access_wesa(seq_idx):
                                ""])
             seq_obj.partial_hbm_analysis += "\n" + str(table)
         else:
+            # and add the warning if they are all buried
             seq_obj.partial_hbm_analysis += "*" * 80
             seq_obj.partial_hbm_analysis += "\nNOTE : THE SEQUENCE HAS NO SOLVENT ACCESSIBLE COORDINATION RESIDUES !\n"
             seq_obj.partial_hbm_analysis += "*" * 80
@@ -103,13 +105,13 @@ def access_wesa(seq_idx):
 
         seqs_from_job = models.Sequence.objects.filter(jobnum=seq_obj.jobnum, status_hbm=models.Sequence.STATUS_QUEUED)
         if not seqs_from_job:
-            if seq_obj.jobnum.email:
+            if seq_obj.jobnum.submittedby:
                 body = f"You can access the analysis at http://localhost:8000/SeqDHBM/{seq_obj.jobnum.id}"
                 e_msg = EmailMessage(
                     subject=f'SeqD-HBM: Your analysis number {seq_obj.jobnum.id} is complete',
                     body=body,
                     from_email='seqdhbm@gmail.com',
-                    to=[seq_obj.jobnum.email],
+                    to=[seq_obj.jobnum.submittedby],
                     headers={'Message-ID': 'foo'},
                 )
                 e_msg.send(fail_silently=False)
@@ -127,9 +129,9 @@ def check_for_pending_sequences():
     queryset = models.Sequence.objects.filter(
             status_hbm=models.Sequence.STATUS_QUEUED,
             mode=models.Sequence.WESA_MODE)
-    coco = ""
+    coco = "debugmessage:\n"
     for seq in queryset:
-        coco += f"tasks.check_for_pending_sequences {seq.id}\n {seq.seqchain}"
+        coco += f"tasks.check_for_pending_sequences {seq.id}\n {seq.seqchain}\n"
         access_wesa.delay(seq.id)
 
     # TEST manage the status of the seq and jobs (wesa?)

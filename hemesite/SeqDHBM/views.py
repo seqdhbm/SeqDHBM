@@ -16,6 +16,7 @@ import os
 #                -  One function to send to wesa
 #                -  One function (scheduled) to check if there are pending jobs
 #                -  Update fields in tables job and Sequence to control pending
+# TODO timesheet - Monday, 14:00 -
 # DONE:
 #            -  Save to database via celery ok
 #            -  Create jobs ok
@@ -24,6 +25,8 @@ import os
 #            -  make the results accessisble ok
 # Future: celery has a 'chain' function that might be handy to pipe the
 #    homology -> docking -> md process
+# Future: start celery as a daemon:
+#  http://docs.celeryproject.org/en/latest/userguide/daemonizing.html#daemonizing
 # Future: use the timestamp to protect the results
 # Future: read about security: https://docs.djangoproject.com/en/2.1/topics/security/#user-uploaded-content-security
 # Future: check a service to verify if the email belongs to an academic institution

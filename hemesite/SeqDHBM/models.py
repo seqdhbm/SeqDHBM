@@ -17,7 +17,7 @@ class Job(models.Model):
             description += f"Full analysis report\n{'*'*100}\n\n"
             description += "\n\n\n".join(lines)
         else:
-            sequences = models.Sequence.objects.get(jobnum=self)
+            sequences = Sequence.objects.filter(jobnum=self)
             filtered = [x for x in sequences if x.status_hbm != Sequence.STATUS_QUEUED]
             description += f"\n{len(filtered)} out of {len(sequences)} processed\n{'*'*100}\n\n"
             for seq in filtered:

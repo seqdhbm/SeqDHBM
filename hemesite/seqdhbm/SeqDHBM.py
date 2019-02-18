@@ -244,13 +244,13 @@ def GetResultsFromWESA(seq_pk):
     # Split in lines and remove leading and trailing spaces
     lines = [x.strip() for x in lines.splitlines()]
     # find the lines containing surface accessibility information
-    regex = re.compile("^([0-9])+ [A-Z] ")
+    regex = re.compile("^([0-9]+)+ [A-Z] ")
     # boolean dictionary about surface accessibility info
     exposed_aa = dict()
     for line in lines:
         match = regex.search(line)
         if match:
-            exposed_aa[int(match.group(1))] = (line[-7:-6] == 1)
+            exposed_aa[int(match.group(1))] = (line[-7:-6] == '1')
     return exposed_aa
 
 
