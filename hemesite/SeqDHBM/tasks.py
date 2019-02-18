@@ -70,11 +70,8 @@ def access_wesa(seq_idx):
     # check if the result is ready
     wesa_result = SeqDHBM.GetResultsFromWESA(seq_idx)
     if wesa_result:
-        print("wesa_result", wesa_result)
-        print("tasks.py line 54ish: ", wesa_result)
         for result in models.Result_HBM.objects.filter(sequence=seq_idx):
             # check if the coordinating aa is not exposed
-            print("result.coordatom", result.coord_atom)
             if not wesa_result[int(result.coord_atom[1:])]:
                 result.delete()
         seq_obj = models.Sequence.objects.get(pk=seq_idx)
@@ -93,7 +90,7 @@ def access_wesa(seq_idx):
             seq_obj.partial_hbm_analysis += "\n" + str(table)
         else:
             # and add the warning if they are all buried
-            seq_obj.partial_hbm_analysis += "*" * 80
+            seq_obj.partial_hbm_analysis += f"\n{'*' * 80}\n"
             seq_obj.partial_hbm_analysis += "\nNOTE : THE SEQUENCE HAS NO SOLVENT ACCESSIBLE COORDINATION RESIDUES !\n"
             seq_obj.partial_hbm_analysis += "*" * 80
             seq_obj.warnings_hbm += "The sequence has no solvent accessible coordination residues"
@@ -133,16 +130,15 @@ def check_for_pending_sequences():
     for seq in queryset:
         coco += f"tasks.check_for_pending_sequences {seq.id}\n {seq.seqchain}\n"
         access_wesa.delay(seq.id)
-
-    # TEST manage the status of the seq and jobs (wesa?)
+    # DONE manage the status of the seq and jobs (wesa?)
     # DONE Load the sequence and all their results from db
-    # TEST Check which of them are buried and delete
-    # TEST If no coord aa is left, add the warning
-    # TEST update the partial analysis
-    # TEST Check if there are still pending sequences for WESA_tmp
-    # TEST If all were processed, update the job to finished, compile the full analysis
+    # DONE Check which of them are buried and delete
+    # DONE If no coord aa is left, add the warning
+    # TODO If no coord aa is left, the full analysis is not being writen
+    # DONE update the partial analysis
+    # DONE Check if there are still pending sequences for WESA_tmp
+    # DONE If all were processed, update the job to finished, compile the full analysis
     # TEST and send an email to the submitter
-
     return coco
     # uncomment after debugging
     # return f"There were {len(queryset)} sequences pending"

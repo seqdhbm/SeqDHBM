@@ -85,8 +85,6 @@ def ReadFasta(filename):
 
 # # Program functions
 
-# In[4]:
-
 
 #######################################################################################################################
 ################################################
@@ -103,7 +101,7 @@ def SequenceValidityCheck(current_sequence_list):
     If all characters are valid then the flag should be 0 and 0 is returned
     """
     standard_aa_list = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
-                        'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y'] # List of the 20 standard amino acids
+                        'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']  # List of the 20 standard amino acids
     flag = 0
     for i in range(len(current_sequence_list)):
         if current_sequence_list[i] not in standard_aa_list:
@@ -170,7 +168,7 @@ def CheckCPMotif(ninemer):
     """Checks if the ninemer is coordinated by CP motif.
 
     Returns Boolean"""
-    return (ninemer[4:6] == "CP")  # or ("PC" in ninemer_sequence)
+    return ninemer[4:6] == "CP"  # or ("PC" in ninemer_sequence)
 
 
 #######################################################################################################################
@@ -222,12 +220,12 @@ def GetResultsFromWESA(seq_pk):
     Returns A list with the position of each aa, when ready
             Otherwise returns false  """
 
-    wesa_dir=os.path.join(settings.BASE_DIR, "wesa")
-    jobname=f"SeqDHBM2WESA{seq_pk}"
-    html=os.path.join(wesa_dir, jobname+'.html')
+    wesa_dir = os.path.join(settings.BASE_DIR, "wesa")
+    jobname = f"SeqDHBM2WESA{seq_pk}"
+    html = os.path.join(wesa_dir, jobname+'.html')
     download = os.path.join(wesa_dir, jobname+'.out')
-    wesa_wget_tup='wget -O', download, '-F -i', html
-    wesa_wget_str=' '.join(wesa_wget_tup)  # Convert the tpule to string
+    wesa_wget_tup = 'wget -O', download, '-F -i', html
+    wesa_wget_str = ' '.join(wesa_wget_tup)  # Convert the tpule to string
     os.system(wesa_wget_str)  # Download the output as a .out file
     time.sleep(1)
     with open(download) as f:
@@ -282,7 +280,7 @@ def ShipSeqToWESA(seq, coord_list):
         inp_file = "seq_for_wesa.txt"
         html = jobname+'.html'
         wesa_tup = 'python2 WESA-submit.py', jobname, email, inp_file, '>', html  # This is stored as a tuple
-        wesa_str = ' '.join(wesa_tup) # Convert the tpule to string
+        wesa_str = ' '.join(wesa_tup)  # Convert the tpule to string
         os.system(wesa_str)  # Send the job to the WESA server
         out_list = ""
         wesa_wget_tup = 'wget -O', jobname + '.out', '-F -i', html
@@ -694,7 +692,7 @@ def SpotCoordinationSite(fasta_dict, seq_id, mode):
                     table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_dict[coord],
                                    disulfide_bond_check(pass_charge_dict[coord], cys_count), ""])
                 mylog(logging.INFO, usrout, str(table))
-                output[header]["analysis"] += "\n".join(usrout)
+            output[header]["analysis"] = "\n".join(usrout)
 
             ######################
             # WESA is being used #
@@ -708,7 +706,7 @@ def SpotCoordinationSite(fasta_dict, seq_id, mode):
                                                        "netcharge": pass_charge_out_dict[coord],
                                                        "comment": disulfide_bond_check(pass_charge_dict[coord],
                                                                                        cys_count)}
-                    output[header]["analysis"] += "\n".join(usrout)
+                output[header]["analysis"] = "\n".join(usrout)
                 # FUTURE: If the sequence was processed by wesa previously,
                 #         fetch the results, save again and present to the user
                 # BUT!: Might be affected if the HBM detection algorithm changes

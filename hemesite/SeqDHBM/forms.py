@@ -29,5 +29,4 @@ class SeqSubmission(forms.Form):
          self.add_error("rawseq", "Note: For processing multiple sequences, please use the file upload functionality")
         # i can check if the email is empty for WESA here
         if (not cleaned_data.get("email")) and cleaned_data.get("mode") == "wesa":
-            pass
-            # self.add_error("email", "Email is mandatory when using WESA predictions")
+            self.add_error("email", "Email is mandatory when using WESA predictions")

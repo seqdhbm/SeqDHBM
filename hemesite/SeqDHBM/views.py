@@ -10,19 +10,20 @@ from SeqDHBM import models
 import os
 
 # DOING tasks.check_for_pending_sequences
-# TODO validate if the email is filled if wesa is used
+# TODO Ask Ajay to test the wesa
 # TODO NEXT: Database
 #            -  WESA queue
 #                -  One function to send to wesa
 #                -  One function (scheduled) to check if there are pending jobs
 #                -  Update fields in tables job and Sequence to control pending
-# TODO timesheet - Monday, 14:00 -
+# TODO timesheet - Monday, 14:00 - 19:00
 # DONE:
 #            -  Save to database via celery ok
 #            -  Create jobs ok
 #            -  save the submission ok
 #            -  save the results ok
 #            -  make the results accessisble ok
+#            -  validate if the email is filled when wesa is being used
 # Future: celery has a 'chain' function that might be handy to pipe the
 #    homology -> docking -> md process
 # Future: start celery as a daemon:
@@ -130,16 +131,19 @@ def show_analysis(request, job_id):
 def hemewf(request):
     message = ""
     for seq in models.Sequence.objects.all():
-        message+="<div>"
-        message+="<p>Job num: %d</p>"%seq.jobnum.id
-        message+="<p>Sequence: %s</p>"%seq.seqchain
-        message+="<p>Sent by: %s</p>"%seq.submittedas
-        message+="<p>Prediction: %s</p>"%seq.mode
-        message+="<p>Status of motif detection: %s</p>"%seq.status_hbm
-        message+="<p>file location: %s</p>"%seq.fasta_file_location
-        message+="<p>Warnings: %s</p>"%("<br>".join(seq.warnings_hbm.split("\n")))
-    message+="<h1>Results</h1>"
-    for res in  models.Result_HBM.objects.all():
-        message+="<p>Sequence num: %d</p>"%res.sequence.id
-        message+="<p>Coord atom: %s</p>"%res.coord_atom
+        message += "<div>"
+        message += "<p>Job num: %d</p>" % seq.jobnum.id
+        message += "<p>Sequence: %s</p>" % seq.seqchain
+        message += "<p>Sent by: %s</p>" % seq.submittedas
+        message += "<p>Prediction: %s</p>" % seq.mode
+        message += "<p>Status of motif detection: %s</p>" % seq.status_hbm
+        message += "<p>file location: %s</p>" % seq.fasta_file_location
+        message += "<p>Warnings: %s</p>" % ("<br>".join(seq.warnings_hbm.split("\n")))
+    message += "<h1>Results</h1>"
+    for res in models.Result_HBM.objects.all():
+        message += "<p>Sequence num: %d</p>" % res.sequence.id
+        message += "<p>Coord atom: %s</p>" % res.coord_atom
+    message = ""
+    for seq in models.Sequence.objects.filter(jobnum=models.Job.objects.get(pk=40)):
+        message += seq.partial_hbm_analysis + "<br>"
     return HttpResponse(message)
