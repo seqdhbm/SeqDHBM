@@ -1,41 +1,47 @@
 from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, get_list_or_404, redirect
 from django.template import loader
 from .forms import SeqSubmission
 import seqdhbm.workflow as wf
 from SeqDHBM import models
 import os
+from datetime import datetime, timezone
 
 # DOING tasks.check_for_pending_sequences
 # TODO Ask Ajay to test the wesa
-# TODO NEXT: Database
+# TODO: use the timestamp to protect the results
+# DONE NEXT: Database
 #            -  WESA queue
 #                -  One function to send to wesa
 #                -  One function (scheduled) to check if there are pending jobs
 #                -  Update fields in tables job and Sequence to control pending
-# TODO timesheet - Monday, 14:00 - 19:00
 # DONE:
 #            -  Save to database via celery ok
 #            -  Create jobs ok
 #            -  save the submission ok
 #            -  save the results ok
-#            -  make the results accessisble ok
+#            -  make the results accessible ok
 #            -  validate if the email is filled when wesa is being used
 # Future: celery has a 'chain' function that might be handy to pipe the
 #    homology -> docking -> md process
 # Future: start celery as a daemon:
 #  http://docs.celeryproject.org/en/latest/userguide/daemonizing.html#daemonizing
-# Future: use the timestamp to protect the results
 # Future: read about security: https://docs.djangoproject.com/en/2.1/topics/security/#user-uploaded-content-security
 # Future: check a service to verify if the email belongs to an academic institution
 
 
-# TODO: put this function somewhere appropriate:
 def handle_uploaded_file(f, filename):
-    """Necessary for receiving files from the user (POST method)."""
+    """
+    WHEN: The user submits a form using a POST method.
+    GIVEN: The FILES section of the form is not empty.
+    THEN: download the files, so they can be processed.
+
+    :param f: the binary information sent in the form.
+    :param filename: the file path to save the file
+    """
 
     with open(filename, 'wb+') as destination:
         for chunk in f.chunks():
@@ -43,6 +49,14 @@ def handle_uploaded_file(f, filename):
 
 
 def index(request):
+    """
+    GIVEN: The website is active.
+    WHEN: The user accesses the main page or submits a job to be processed.
+    THEN: Show the webpage or validate the information and process the job.
+
+    :param request: the http request (POST or GET)
+    :return: The home webpage of the site (or a redirect to the results page).
+    """
     result = []
     debugging = ""
     # if this is a POST request we need to process the form data
@@ -71,6 +85,7 @@ def index(request):
             rawseq = "".join(rawseq.split())
             rawseq = "".join(rawseq.split("\r"))
 
+            # run the workflow seqdhbm analysis for the current inputs
             result = wf.workflow(jobfolder=jobfolder,
                                  rawseq=rawseq,
                                  fastafile=fastafile,
@@ -78,13 +93,14 @@ def index(request):
                                  mode=form.cleaned_data["mode"]
                                  )
 
+            # Update the full analysis of the job using the
             myjob.set_full_hbm_analysis([x["analysis"] for x in result])
-
             # if all went well, send the email to the user
             # https://docs.djangoproject.com/en/2.1/topics/email/#django.core.mail.EmailMessage
             email = form.cleaned_data['email']
+            password = myjob.pass_gen()
             if email:
-                body = "You can access the analysis at http://localhost:8000/SeqDHBM/%d" % myjob.id
+                body = "You can access the analysis at http://localhost:8000/SeqDHBM/%d/%s" % (myjob.id, password)
                 e_msg = EmailMessage(
                     subject=f'SeqD-HBM: Your analysis number {myjob.id}',
                     body=body,
@@ -93,7 +109,7 @@ def index(request):
                     headers={'Message-ID': 'foo'},
                 )
                 e_msg.send(fail_silently=False)
-            return redirect("%d/" % myjob.id)
+            return redirect("%d/%s" % (myjob.id, password))
     # if a GET (or any other method) we'll create a blank form
     else:
         form = SeqSubmission()
@@ -107,28 +123,62 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 
-def show_result(request, job_id):
+def show_result(request, job_id, passw: str = ""):
+    """
+    GIVEN: The database of jobs (completed or queued)
+    WHEN: The user requests information about a job
+    THEN: List the number of pending jobs as well as html information for the processed jobs.
+
+    :param request: the http request.
+    :param job_id: The identifier of the job.
+    :param passw: Security code to the given job
+    :return: The formatted webpage with the requested information. The template comes from one http file.
+    """
     template = loader.get_template('SeqDHBM/result.html')
     job = get_object_or_404(models.Job, id=job_id)
     seqs = get_list_or_404(models.Sequence, jobnum=job)
-    res = {}
-    for seq in seqs:
-        res[seq] = [seq.seqchain[x:x+70] for x in range(0, len(seq.seqchain), 70)]
-    context = {
-        "job": job,
-        "processing": len([x for x in seqs if x.status_hbm == models.Sequence.STATUS_QUEUED]),
-        "result": {x: y for x, y in res.items() if x.status_hbm == models.Sequence.STATUS_PROCESSED},
-        "failed": {x: y for x, y in res.items() if x.status_hbm == models.Sequence.STATUS_FAILED}
-    }
-    return HttpResponse(template.render(context, request))
+    if job.pass_gen() == passw:
+        res = {}
+        for seq in seqs:
+            res[seq] = [seq.seqchain[x:x+70] for x in range(0, len(seq.seqchain), 70)]
+        context = {
+            "job": job,
+            "processing": len([x for x in seqs if x.status_hbm == models.Sequence.STATUS_QUEUED]),
+            "result": {x: y for x, y in res.items() if x.status_hbm == models.Sequence.STATUS_PROCESSED},
+            "failed": {x: y for x, y in res.items() if x.status_hbm == models.Sequence.STATUS_FAILED},
+            "passw": passw
+        }
+        return HttpResponse(template.render(context, request))
+    else:
+        raise Http404("Invalid URL (bad secret code and job id combination)")
 
 
-def show_analysis(request, job_id):
+def show_analysis(request, job_id, passw: str = ""):
+    """
+    WHEN: The user requests information about a job he submitted.
+    GIVEN: The job exists.
+    THEN: The full analysis of the job is presented to the user as a text webpage.
+
+    :param request: http request
+    :param job_id: The identifier of the job
+    :param passw: Security code to the given job
+    :return: The formatted webpage with the requested information.
+    """
     job = get_object_or_404(models.Job, id=job_id)
-    return HttpResponse(job.full_hbm_analysis, content_type="text/plain")
+    if job.pass_gen() == passw:
+        return HttpResponse(job.full_hbm_analysis, content_type="text/plain")
+    else:
+        raise Http404("Invalid URL (bad secret code and job id combination)")
 
 
-def hemewf(request):
+def hemewf(request, job_id, passw):
+    """
+    for debugging.
+    /runworkflow/job_id/passw
+
+    :param request:
+    :return:
+    """
     message = ""
     for seq in models.Sequence.objects.all():
         message += "<div>"
@@ -143,7 +193,14 @@ def hemewf(request):
     for res in models.Result_HBM.objects.all():
         message += "<p>Sequence num: %d</p>" % res.sequence.id
         message += "<p>Coord atom: %s</p>" % res.coord_atom
+    # return HttpResponse(message)
     message = ""
-    for seq in models.Sequence.objects.filter(jobnum=models.Job.objects.get(pk=40)):
-        message += seq.partial_hbm_analysis + "<br>"
-    return HttpResponse(message)
+    for seq in models.Sequence.objects.filter(jobnum=models.Job.objects.get(pk=9)):
+        message += seq.partial_hbm_analysis + "\n"
+    job = models.Job.objects.get(pk=9)
+    message = f"{(job.submission_date-datetime(1980, 11, 17, tzinfo=timezone.utc)).total_seconds()}"
+    if job.pass_gen() == passw:
+        print(job_id)
+        print(float(passw))
+        message += f"\n{request.META}"
+    return HttpResponse(message, content_type="text/plain")

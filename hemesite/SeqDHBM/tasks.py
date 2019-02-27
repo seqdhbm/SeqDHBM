@@ -126,9 +126,7 @@ def check_for_pending_sequences():
     queryset = models.Sequence.objects.filter(
             status_hbm=models.Sequence.STATUS_QUEUED,
             mode=models.Sequence.WESA_MODE)
-    coco = "debugmessage:\n"
     for seq in queryset:
-        coco += f"tasks.check_for_pending_sequences {seq.id}\n {seq.seqchain}\n"
         access_wesa.delay(seq.id)
     # DONE manage the status of the seq and jobs (wesa?)
     # DONE Load the sequence and all their results from db
@@ -139,6 +137,4 @@ def check_for_pending_sequences():
     # DONE Check if there are still pending sequences for WESA_tmp
     # DONE If all were processed, update the job to finished, compile the full analysis
     # TEST and send an email to the submitter
-    return coco
-    # uncomment after debugging
-    # return f"There were {len(queryset)} sequences pending"
+    return f"There were {len(queryset)} sequences pending"

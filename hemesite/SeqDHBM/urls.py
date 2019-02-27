@@ -4,7 +4,9 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('runworkflow/', views.hemewf, name='hemewf'),
+    path('runworkflow/<int:job_id>/<passw>', views.hemewf, name='hemewf'),
+    path('<int:job_id>/<passw>/', views.show_result, name='result'),
+    path('analysis/<int:job_id>/<passw>/', views.show_analysis, name='analysis'),
     path('<int:job_id>/', views.show_result, name='result'),
     path('analysis/<int:job_id>/', views.show_analysis, name='analysis'),
     # path(<route>, <view>, <kwargs>, <name>)

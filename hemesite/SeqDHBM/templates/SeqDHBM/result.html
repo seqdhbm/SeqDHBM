@@ -13,7 +13,7 @@ table, th, td {
   {% if processing > 0 %}
     <h3>Note:</h3>
     <p>There are still {{ processing }} sequences being processed by our server.</p>
-    <p>Refresh this page or access <a href="{% url 'result' job.id %}">this link</a> later </p>
+    <p>Refresh this page or access <a href="{% url 'result' job.id passw %}">this link</a> later </p>
   {% endif %}
   {% if failed %}
     <h3>The following sequence(s) could not be processed: </h3>

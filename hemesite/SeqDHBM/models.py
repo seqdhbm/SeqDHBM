@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from datetime import datetime, timezone
 
 
 # Create your models here.
@@ -24,6 +25,10 @@ class Job(models.Model):
                 description += seq.partial_hbm_analysis + "\n\n\n"
         self.full_hbm_analysis = description
         self.save()
+
+    def pass_gen(self):
+        code = self.submission_date - datetime(1980, 11, 17, tzinfo=timezone.utc)
+        return str(code.total_seconds())
 
 
 class Sequence(models.Model):
