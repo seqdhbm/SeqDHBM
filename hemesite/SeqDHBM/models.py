@@ -10,6 +10,13 @@ class Job(models.Model):
     full_hbm_analysis = models.TextField(blank=True)
 
     def set_full_hbm_analysis(self, lines: list = None):
+        """
+        Updates the Full report by copying the partial analysis of each sequence submitted
+        in the job.
+
+        :param lines: The full report, in case it was already generated.
+        :return:
+        """
         description = "*"*100
         description += "\nSeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs\n"
         description += self.submission_date.strftime("%A , %B-%d-%Y, %H:%M:%S")
@@ -27,6 +34,11 @@ class Job(models.Model):
         self.save()
 
     def pass_gen(self):
+        """
+        Generates a secret key for each job
+
+        :return: The secret key. Shhhh!
+        """
         code = self.submission_date - datetime(1980, 11, 17, tzinfo=timezone.utc)
         return str(code.total_seconds())
 

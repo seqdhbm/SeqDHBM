@@ -194,13 +194,12 @@ def hemewf(request, job_id, passw):
         message += "<p>Sequence num: %d</p>" % res.sequence.id
         message += "<p>Coord atom: %s</p>" % res.coord_atom
     # return HttpResponse(message)
-    message = ""
-    for seq in models.Sequence.objects.filter(jobnum=models.Job.objects.get(pk=9)):
+    message += "\n\n\n"
+    for seq in models.Sequence.objects.filter(jobnum=models.Job.objects.get(pk=27)):
         message += seq.partial_hbm_analysis + "\n"
-    job = models.Job.objects.get(pk=9)
-    message = f"{(job.submission_date-datetime(1980, 11, 17, tzinfo=timezone.utc)).total_seconds()}"
+    job = models.Job.objects.get(pk=27)
     if job.pass_gen() == passw:
-        print(job_id)
-        print(float(passw))
+        print(job.id)
+        print()
         message += f"\n{request.META}"
     return HttpResponse(message, content_type="text/plain")

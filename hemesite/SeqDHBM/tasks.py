@@ -103,7 +103,8 @@ def access_wesa(seq_idx):
         seqs_from_job = models.Sequence.objects.filter(jobnum=seq_obj.jobnum, status_hbm=models.Sequence.STATUS_QUEUED)
         if not seqs_from_job:
             if seq_obj.jobnum.submittedby:
-                body = f"You can access the analysis at http://localhost:8000/SeqDHBM/{seq_obj.jobnum.id}"
+                body = f"You can access the analysis at http://localhost:8000/SeqDHBM/" + \
+                       f"{seq_obj.jobnum.id}/{seq_obj.jobnum.pass_gen()}"
                 e_msg = EmailMessage(
                     subject=f'SeqD-HBM: Your analysis number {seq_obj.jobnum.id} is complete',
                     body=body,
@@ -128,13 +129,4 @@ def check_for_pending_sequences():
             mode=models.Sequence.WESA_MODE)
     for seq in queryset:
         access_wesa.delay(seq.id)
-    # DONE manage the status of the seq and jobs (wesa?)
-    # DONE Load the sequence and all their results from db
-    # DONE Check which of them are buried and delete
-    # DONE If no coord aa is left, add the warning
-    # TODO If no coord aa is left, the full analysis is not being writen
-    # DONE update the partial analysis
-    # DONE Check if there are still pending sequences for WESA_tmp
-    # DONE If all were processed, update the job to finished, compile the full analysis
-    # TEST and send an email to the submitter
     return f"There were {len(queryset)} sequences pending"

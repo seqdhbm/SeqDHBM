@@ -161,7 +161,6 @@ def workflow(jobfolder= "J0", fastafile=None, pdbs=None, pdbid="", rawseq="", mo
                     mode
                     )
                 analysed_seq = analysis[">" + item["name"]]
-                # TODO: SET TO 'RECEIVED' NOW AND TO 'PROCESSED' AFTER THE RESULTS ARE SAVED
                 if ("fail" in analysed_seq) and (analysed_seq["fail"]):
                     seq_obj.status_hbm = models.Sequence.STATUS_FAILED
                 elif analysed_seq["mode"] != mode:
