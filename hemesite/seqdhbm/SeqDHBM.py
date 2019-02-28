@@ -218,8 +218,15 @@ def GetResultsFromWESA(seq_pk):
     jobname = f"SeqDHBM2WESA{seq_pk}"
     html = os.path.join(wesa_dir, jobname+'.html')
     download = os.path.join(wesa_dir, jobname+'.out')
+    with open(html) as f:
+        html_content = f.read().splitlines()
+    html_content = "".join(html_content)
+    # First look for some error in the html content (submission error)
+    match = re.search("<h1>WESA Error</h1><p>(.*?)</p>", html_content)
+    if match:  # Raise an assertion error if any error was found
+        raise AssertionError(match.group(1))
     wesa_wget_tup = 'wget -O', download, '-F -i', html
-    wesa_wget_str = ' '.join(wesa_wget_tup)  # Convert the tpule to string
+    wesa_wget_str = ' '.join(wesa_wget_tup)  # Convert the tuple to string
     os.system(wesa_wget_str)  # Download the output as a .out file
     time.sleep(1)
     with open(download) as f:

@@ -29,6 +29,32 @@ table, th, td {
             {{ seq.warnings_hbm | linebreaksbr }}
           {% endautoescape %}
         </font>
+        {% if seq.result_hbm_set.all|length %}
+        <p>The sequence was processed with the WESA prediction SKIPPED</p>
+        <table>
+          <tr>
+            <th>S.No</th>
+            <th>Coord. residue</th>
+            <th>9mer motif</th>
+            <th>Net charge</th>
+            <th>Comment</th>
+            <th>Kd or strength</th>
+          </tr>
+          {% for res in seq.result_hbm_set.all %}
+            <tr>
+              <td>{{ forloop.counter }} </td>
+              <td>{{ res.coord_atom }} </td>
+              <td>{{ res.ninemer }} </td>
+              <td>{{ res.net_charge }}</td>
+              <td>{% if res.disulfide_possible %}
+                Possible S-S bond
+              {% endif %}
+              </td></td>
+              <td>
+            </tr>
+          {% endfor %}
+        </table>
+        {% endif %}
     {% endfor %}
   {% endif %}
   {% if result and failed %}

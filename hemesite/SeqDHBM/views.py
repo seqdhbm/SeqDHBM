@@ -8,11 +8,18 @@ from .forms import SeqSubmission
 import seqdhbm.workflow as wf
 from SeqDHBM import models
 import os
-from datetime import datetime, timezone
 
 # DOING tasks.check_for_pending_sequences
 # TODO Ask Ajay to test the wesa
-# TODO: use the timestamp to protect the results
+# TODO Model a db for the group's sequences
+# TODO write if the sequence was predicted by wesa or not.. show results and red message
+# TODO check for errors in the html
+# TODO check if the sequence has the minimum size for wesa
+# TODO Upgrade the software to use yasara
+# TODO Read papers from the Bioinformatics Journals
+# TODO setup a different sgbd/web server (GUnicorn / apache)
+# TODO Minor adjustments (require the email to be from university, security measures -> requires apache)
+# DONE: use the timestamp to protect the results
 # DONE NEXT: Database
 #            -  WESA queue
 #                -  One function to send to wesa

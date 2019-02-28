@@ -65,54 +65,94 @@ def access_wesa(seq_idx):
     """
     GIVEN: There are sequences in the database with pending WESA analysis.
     WHEN: Periodically, scheduled.
-    THEN: Check if the results are ready in the WESA repository and update the records. """
+    THEN: Check if the results are ready in the WESA repository and update the records.
+
+    :param seq_idx: the id of the sequence record in the db
+    """
 
     # check if the result is ready
-    wesa_result = SeqDHBM.GetResultsFromWESA(seq_idx)
-    if wesa_result:
-        for result in models.Result_HBM.objects.filter(sequence=seq_idx):
-            # check if the coordinating aa is not exposed
-            if not wesa_result[int(result.coord_atom[1:])]:
-                result.delete()
-        seq_obj = models.Sequence.objects.get(pk=seq_idx)
+    try:
+        wesa_result = SeqDHBM.GetResultsFromWESA(seq_idx)
+        if wesa_result:
+            for result in models.Result_HBM.objects.filter(sequence=seq_idx):
+                # check if the coordinating aa is not exposed
+                if not wesa_result[int(result.coord_atom[1:])]:
+                    result.delete()
+            seq_obj = models.Sequence.objects.get(pk=seq_idx)
 
+            results = models.Result_HBM.objects.filter(sequence=seq_idx)
+            if results:  # Check if there is any ninemer left
+                # results.sort(key=lambda x: x.coord_atom[1:])
+                table = PrettyTable([
+                    "S.no",
+                    "Coord. residue",
+                    "9mer motif",
+                    "Net charge",
+                    "Comment",
+                    "Kd or strength"])  # TODO Predicted Kd? Strength as another field?
+                for pos, record in enumerate(sorted(results, key=lambda x: x.coord_atom[1:])):
+                    table.add_row([pos+1,
+                                   record.coord_atom,
+                                   record.ninemer,
+                                   record.net_charge,
+                                   "Possible S-S Bond" if record.disulfide_possible else " "*17,
+                                   ""])
+                seq_obj.partial_hbm_analysis += "\n" + str(table)
+            else:
+                # and add the warning if they are all buried
+                seq_obj.partial_hbm_analysis += f"\n{'*' * 80}\n"
+                seq_obj.partial_hbm_analysis += "\nNOTE : THE SEQUENCE HAS NO SOLVENT ACCESSIBLE COORDINATION RESIDUES !\n"
+                seq_obj.partial_hbm_analysis += "*" * 80
+                seq_obj.warnings_hbm += "\nThe sequence has no solvent accessible coordination residues"
+            seq_obj.status_hbm = models.Sequence.STATUS_PROCESSED
+            seq_obj.save()
+        else:
+            return
+    except AssertionError as e:
+        seq_obj = models.Sequence.objects.get(pk=seq_idx)
+        seq_obj.partial_hbm_analysis += f"\n{'*' * 80}"
+        seq_obj.partial_hbm_analysis += f"\n Unexpected WESA Error: {e}"
+        seq_obj.partial_hbm_analysis += "\n Try again after a while"
         results = models.Result_HBM.objects.filter(sequence=seq_idx)
         if results:  # Check if there is any ninemer left
-            # results.sort(key=lambda x: x.coord_atom[1:])
-            table = PrettyTable(["S.no", "Coord. residue", "9mer motif", "Net charge", "Comment", "Kd or strength"])
+            seq_obj.partial_hbm_analysis += f"\n{'*' * 80}"
+            seq_obj.partial_hbm_analysis += f"\nShowing the results without solvent accessibility analysis"
+            table = PrettyTable([
+                "S.no",
+                "Coord. residue",
+                "9mer motif",
+                "Net charge",
+                "Comment",
+                "Kd or strength"])  # TODO Predicted Kd? Strength as another field?
             for pos, record in enumerate(sorted(results, key=lambda x: x.coord_atom[1:])):
-                table.add_row([pos+1,
+                table.add_row([pos + 1,
                                record.coord_atom,
                                record.ninemer,
                                record.net_charge,
-                               "Possible S-S Bond" if record.disulfide_possible else " "*17,
+                               "Possible S-S Bond" if record.disulfide_possible else " " * 17,
                                ""])
             seq_obj.partial_hbm_analysis += "\n" + str(table)
-        else:
-            # and add the warning if they are all buried
-            seq_obj.partial_hbm_analysis += f"\n{'*' * 80}\n"
-            seq_obj.partial_hbm_analysis += "\nNOTE : THE SEQUENCE HAS NO SOLVENT ACCESSIBLE COORDINATION RESIDUES !\n"
-            seq_obj.partial_hbm_analysis += "*" * 80
-            seq_obj.warnings_hbm += "The sequence has no solvent accessible coordination residues"
-        seq_obj.status_hbm = models.Sequence.STATUS_PROCESSED
+        seq_obj.warnings_hbm += f"\n Unexpected WESA Error: {e}"
+        seq_obj.warnings_hbm += "\n No solvent accessibility prediction could be done."
+        seq_obj.status_hbm = models.Sequence.STATUS_FAILED
         seq_obj.save()
 
-        # update the partial full report
-        seq_obj.jobnum.set_full_hbm_analysis()
+    # update the partial full report
+    seq_obj.jobnum.set_full_hbm_analysis()
 
-        seqs_from_job = models.Sequence.objects.filter(jobnum=seq_obj.jobnum, status_hbm=models.Sequence.STATUS_QUEUED)
-        if not seqs_from_job:
-            if seq_obj.jobnum.submittedby:
-                body = f"You can access the analysis at http://localhost:8000/SeqDHBM/" + \
-                       f"{seq_obj.jobnum.id}/{seq_obj.jobnum.pass_gen()}"
-                e_msg = EmailMessage(
-                    subject=f'SeqD-HBM: Your analysis number {seq_obj.jobnum.id} is complete',
-                    body=body,
-                    from_email='seqdhbm@gmail.com',
-                    to=[seq_obj.jobnum.submittedby],
-                    headers={'Message-ID': 'foo'},
-                )
-                e_msg.send(fail_silently=False)
+    seqs_from_job = models.Sequence.objects.filter(jobnum=seq_obj.jobnum, status_hbm=models.Sequence.STATUS_QUEUED)
+    if not seqs_from_job:
+        if seq_obj.jobnum.submittedby:
+            body = f"You can access the analysis at http://localhost:8000/SeqDHBM/" + \
+                   f"{seq_obj.jobnum.id}/{seq_obj.jobnum.pass_gen()}"
+            e_msg = EmailMessage(
+                subject=f'SeqD-HBM: Your analysis number {seq_obj.jobnum.id} is complete',
+                body=body,
+                from_email='seqdhbm@gmail.com',
+                to=[seq_obj.jobnum.submittedby],
+                headers={'Message-ID': 'foo'},
+            )
+            e_msg.send(fail_silently=False)
 
 
 # Scheduled in the file celery.py
@@ -121,8 +161,11 @@ def check_for_pending_sequences():
     """
     GIVEN: The website is running.
     WHEN: Periodically, scheduled.
-    THEN: Reads if there are any pending sequence. Try to read from the
-    WESA server and update the records in the database."""
+    THEN: Reads if there are any pending sequence. Try to read from the WESA server and
+    update the records in the database.
+
+    :return: A message to the Queue Handler
+    """
 
     queryset = models.Sequence.objects.filter(
             status_hbm=models.Sequence.STATUS_QUEUED,
