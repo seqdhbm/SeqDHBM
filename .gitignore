@@ -8,7 +8,7 @@ hemesite/wesa/*.out
 hemesite/wesa/*.html
 hemesite/wesa/*.txt
 workflow/seqdhbm/
-pass.env
+specificsettings.py
 
 ### Django ###
 *.log
