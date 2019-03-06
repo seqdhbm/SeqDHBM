@@ -11,22 +11,15 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from . import specificsettings as cfg
+
+
+# this import should bring some of the passwords that can't be pushed to
+
+SECRET_KEY = cfg.SECRET_KEY
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-pw_dict = {}
-try:
-    with open (os.path.join(BASE_DIR, "hemesite/pass.env")) as f:
-        lines = f.read().splitlines()
-    for line in lines:
-        vals = line.split(",")
-        pw_dict[vals[0]] = vals[1]
-except Exception as e:
-    print("*"*80)
-    print(e)
-    print("*"*80)
-    raise Exception("Please create the files with passwords '/hemesite/pass.env' as a csv file. Check the file 'example_pass.env' for a model.")
 
 # Celery settings
 
@@ -45,14 +38,11 @@ CELERY_IMPORTS = ['seqdhbm']
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = pw_dict["SECRET_KEY"]# SECRET_KEY   ''
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = cfg.DEBUG
+
 
 ALLOWED_HOSTS = ["131.220.127.75", "131.220.127.81", "127.0.0.1", "localhost"]
-
 
 # Application definition
 
@@ -108,7 +98,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 
@@ -150,8 +139,8 @@ EMAIL_USE_SSL = True
 # control whether a secure connection is used
 
 EMAIL_HOST_USER = "seqdhbm@gmail.com"
-EMAIL_HOST_PASSWORD = pw_dict["EMAIL_HOST_PASSWORD"] # settings, if set, are used to authenticate to the SMTP server
-
+# SECURITY WARNING: keep the secret key used in production secret!
+EMAIL_HOST_PASSWORD = cfg.EMAIL_HOST_PASSWORD
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
