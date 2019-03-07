@@ -1,3 +1,5 @@
+# coding: utf-8
+
 """
 Django settings for hemesite project.
 
@@ -11,7 +13,8 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from . import specificsettings as cfg
+
+from . import local_settings as cfg
 
 
 # this import should bring some of the passwords that can't be pushed to

@@ -16,10 +16,16 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
 
 </head>
 <body>
-<h1>[Seq]uence based [D]etection of [H]eme [B]inding [M]otifs</h1>
+<!--h1>[Seq]uence based [D]etection of [H]eme [B]inding [M]otifs</h1-->
+<h1>epHEMEra</h1>
+<!--<h1>ep<font color="EE0000"><i>HEME</i></font>ra</h1>
+<h1>ep<font color="0000FF"><i>HEME</i></font>ra</h1>
+<h1><font color="0000FF">ep</font><i>HEME</i><font color="0000FF">ra</font></h1>
+<h1>ep<i>HEME</i>ra</h1>
+<h1>ep-Heme-ra</h1> -->
 <p>
   The term "heme-binding motif" (HBM) is used to describe a protein sequence stretch that may interact with the heme molecule.
-  The evaluation of the binding behavior of a plethora of heme-peptide complexes resulted in the implementation of a prediction tool (SeqD-HBM) for heme-binding
+  The evaluation of the binding behavior of a plethora of heme-peptide complexes resulted in the implementation of a prediction tool (EpHEMEra) (SeqD-HBM) for heme-binding
       motifs which eventually led and will perspectively lead to the identification and verification of so far unknown-heme-regulated proteins.
 </p>
 <p>
@@ -44,11 +50,11 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
 <ul>
  <li>Tony's paper on motif importance (<a href="brokenlink">question</a>)</li>
 </ul>
-</p>
+</p-->
   <!--p>
     Cite WESA</p-->
 <hr>
-<h3>SeqD-HBM Online service:</h3>
+<h3>SeqD-HBM Online service:</h3> <!--TODO Change the name of the app -->
 <form enctype="multipart/form-data" action="/SeqDHBM/" method="post" autocomplete="off">
   {% csrf_token %}
   {% if errors %}
@@ -73,7 +79,6 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
     {% for result in results %}
         <div>
           <H3>  {{ result.name }} </H3>
-          <!--TODO divide the sequence in lines with 70 chars-->
           <p><font size="-1" face= 'Courier New'> {{ result.seq }} </font> </p>
           {% for coord, data in result.result.items %}
               {{ coord }}
@@ -81,7 +86,6 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
               {{ data.netcharge }}
               {{ data.comment }}
           {% endfor %}
-          <!-- TODO use red for fail -->
           {% for warn in result.warnings %}
             <p> {{ warn }}</p>
           {% endfor %}
