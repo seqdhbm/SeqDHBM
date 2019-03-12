@@ -37,7 +37,7 @@ def manage_fasta_files(fastafile: str, jobfolder: str):
                  "submitted_as": "Fasta File",
                  "fail": True,
                  "warnings": ["Error reading the fasta file sent by the user.",
-                              e]
+                              str(e)]
                  }]
 
 
@@ -130,7 +130,8 @@ def workflow(jobfolder: str = "J0",
 
     seq_list = []  # The sequences and their analysis results
 
-    # this has to come first, otherwise organize_sequences2 will run on unnecessary sequences
+    # this has to come first, otherwise organize_sequences2
+    #  will run on unnecessary sequences
     if fastafile:
         seq_list += manage_fasta_files(fastafile, jobfolder)
 
@@ -185,6 +186,10 @@ def workflow(jobfolder: str = "J0",
                 if item["submitted_as"] == sub_form_desc:
                     _sub = sub_form_id
             _stat = models.Sequence.STATUS_FAILED if "fail" in item else models.Sequence.STATUS_QUEUED
+            if "warnings" in item:
+                warnings = item['warnings']
+            else:
+                warnings = []
             seq_obj = models.Sequence(
                 jobnum=job,
                 seqchain=item['seq'],
@@ -194,7 +199,8 @@ def workflow(jobfolder: str = "J0",
                 status_hbm=_stat,
                 fasta_file_location=os.path.join(
                     item["folder"],
-                    item["file"])
+                    item["file"]),
+                warnings_hbm="\n".join(warnings)
             )
             seq_obj.save()
 
@@ -222,4 +228,5 @@ def workflow(jobfolder: str = "J0",
             seq_obj.warnings_hbm = "\n".join(analysed_seq["warnings"])
             seq_obj.save()
             tasks.assync_save_results.delay(seq_obj.id, analysed_seq["result"])
+
     return seq_list

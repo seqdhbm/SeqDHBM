@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from django.conf import settings
+# from django.contrib.sites.models import Site
 from django.core.mail import EmailMessage
 import os
 from SeqDHBM import models
@@ -9,6 +10,8 @@ import seqdhbm.workflow as wf
 __all__ = [
     'handle_uploaded_file', 'clean_raw_seq'
 ]
+
+APP_URL_PATTERN = ""
 
 
 def handle_uploaded_file(f, filename):
@@ -60,7 +63,10 @@ def process_form(form, submitted_files):
     # save the fastafile in disk
     if "fastafiles" in submitted_files:
         fastafile = submitted_files['fastafiles'].name
-        fastafilepath = os.path.join(jobfolder, submitted_files['fastafiles'].name)
+        fastafilepath = os.path.join(
+            jobfolder,
+            submitted_files['fastafiles'].name
+        )
         handle_uploaded_file(submitted_files['fastafiles'], fastafilepath)
     else:
         fastafile = ""
@@ -80,13 +86,16 @@ def process_form(form, submitted_files):
     #####################################################
     # Update the database and inform user of his request
     #####################################################
-    myjob.set_full_hbm_analysis([x["analysis"] for x in result])
+    myjob.set_full_hbm_analysis([x["analysis"] for x in result
+                                 if "analysis" in x])
     # if all went well, send the email to the user
     # https://docs.djangoproject.com/en/2.1/topics/email/#django.core.mail.EmailMessage
     email = form.cleaned_data['email']
     password = myjob.pass_gen()
     if email:
-        body = "You can access the analysis at http://localhost:8000/SeqDHBM/%d/%s" % (myjob.id, password)
+        site_domain = settings.SITE_DOMAIN
+        body = "You can access your results at " + \
+               f"http://{site_domain}/SeqDHBM/{myjob.id}/{password}"
         e_msg = EmailMessage(
             subject=f'SeqD-HBM: Your analysis number {myjob.id}',
             body=body,

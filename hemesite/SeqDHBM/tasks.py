@@ -7,6 +7,7 @@ import time
 
 from celery import shared_task
 from celery.task import task
+from django.conf import settings
 from django.core.mail import EmailMessage
 from prettytable import PrettyTable
 from seqdhbm import fasta
@@ -14,11 +15,14 @@ from seqdhbm import SeqDHBM
 
 from SeqDHBM import models
 
-__all__ = ['assync_organize_seq', 'assync_save_results', 'access_wesa', 'check_for_pending_sequences']
+__all__ = [
+    'assync_organize_seq', 'assync_save_results', 'access_wesa',
+    'check_for_pending_sequences'
+]
 
 # About Celery
-# # http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html
-# # http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html#first-steps
+# http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html
+# http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html#first-steps
 # hemesitefolder$ celery -A hemesite worker --detach -l debug --concurrency=15
 # hemesitefolder$ celery -A hemesite worker --detach -l debug --concurrency=1 -Q wesa,celery
 # hemesitefolder$ celery -A hemesite beat --detach -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
@@ -79,6 +83,26 @@ def access_wesa(seq_idx):
     """
 
     # check if the result is ready
+    no_solvent_analysis_msg = [
+        f"\n{'*' * 80}\n",
+        "NOTE: THE SEQUENCE HAS NO SOLVENT ACCESSIBLE COORDINATION RESIDUES!",
+        "\n",
+        "*" * 80
+    ]
+    no_solvent_warn = "\nThe sequence has no solvent " +\
+                      "accessible coordination residues"
+    wesa_error_msg = [
+        "\n",
+        f"{'*' * 80}\n ",
+        f"Unexpected WESA Error: {e}\n ",
+        "Try again after a while"
+    ]
+    wesa_error_but_results = [
+        "\n",
+        f"{'*' * 80}\n",
+        "Showing the results without solvent accessibility analysis",
+        "\n"
+    ]
     try:
         wesa_result = SeqDHBM.get_results_from_wesa(seq_idx)
         if wesa_result:
@@ -90,45 +114,56 @@ def access_wesa(seq_idx):
 
             results = models.Result_HBM.objects.filter(sequence=seq_idx)
             if results:  # Check if there is any ninemer left
-                # results.sort(key=lambda x: x.coord_atom[1:])
                 seq_obj.partial_hbm_analysis += "\n" + result_to_pretty_table(results)
             else:
                 # and add the warning if they are all buried
-                seq_obj.partial_hbm_analysis += f"\n{'*' * 80}\n"
-                seq_obj.partial_hbm_analysis += "NOTE: THE SEQUENCE HAS NO SOLVENT ACCESSIBLE COORDINATION RESIDUES !\n"
-                seq_obj.partial_hbm_analysis += "*" * 80
-                seq_obj.warnings_hbm += "\nThe sequence has no solvent accessible coordination residues"
+                for line in no_solvent_analysis_msg:
+                    seq_obj.partial_hbm_analysis += line
+                seq_obj.warnings_hbm += no_solvent_warn
             seq_obj.status_hbm = models.Sequence.STATUS_PROCESSED
             seq_obj.save()
         else:
             return
     except AssertionError as e:
         seq_obj = models.Sequence.objects.get(pk=seq_idx)
-        seq_obj.partial_hbm_analysis += f"\n{'*' * 80}\n Unexpected WESA Error: {e}\n Try again after a while"
+        for line in wesa_error_msg:
+            seq_obj.partial_hbm_analysis += line
         results = models.Result_HBM.objects.filter(sequence=seq_idx)
         if results:  # Check if there is any ninemer left
-            seq_obj.partial_hbm_analysis += f"\n{'*' * 80}\nShowing the results without solvent accessibility analysis"
-            seq_obj.partial_hbm_analysis += "\n" + result_to_pretty_table(results)
-        seq_obj.warnings_hbm += f"\n Unexpected WESA Error: {e}\n No solvent accessibility prediction could be done."
+            for line in wesa_error_but_results:
+                seq_obj.partial_hbm_analysis += line
+            seq_obj.partial_hbm_analysis += result_to_pretty_table(results)
+        seq_obj.warnings_hbm += f"\n Unexpected WESA Error: {e}\n"
+        seq_obj.warnings_hbm += "No solvent accessibility " +\
+                                "prediction could be done."
         seq_obj.status_hbm = models.Sequence.STATUS_FAILED
         seq_obj.save()
 
     # update the partial full report
     seq_obj.jobnum.set_full_hbm_analysis()
 
-    seqs_from_job = models.Sequence.objects.filter(jobnum=seq_obj.jobnum, status_hbm=models.Sequence.STATUS_QUEUED)
-    if not seqs_from_job:
-        if seq_obj.jobnum.submittedby:
-            body = f"You can access the analysis at http://localhost:8000/SeqDHBM/" + \
-                   f"{seq_obj.jobnum.id}/{seq_obj.jobnum.pass_gen()}"
-            e_msg = EmailMessage(
-                subject=f'SeqD-HBM: Your analysis number {seq_obj.jobnum.id} is complete',
-                body=body,
-                from_email='seqdhbm@gmail.com',
-                to=[seq_obj.jobnum.submittedby],
-                headers={'Message-ID': 'foo'},
-            )
-            e_msg.send(fail_silently=False)
+    seqs_from_job = models.Sequence.objects.filter(
+        jobnum=seq_obj.jobnum,
+        status_hbm=models.Sequence.STATUS_QUEUED
+    )
+    # if no more sequences are pending for the job and the user filled
+    #  an email address, send him the analysis
+    if not seqs_from_job and seq_obj.jobnum.submittedby:
+        site_domain = settings.SITE_DOMAIN
+        email_subject = f'SeqD-HBM: Your analysis ' +\
+                        f'number {seq_obj.jobnum.id} is complete'
+        email_body = f"You can access your results at " + \
+                     f"http://{site_domain}/SeqDHBM/" + \
+                     f"{seq_obj.jobnum.id}/" + \
+                     f"{seq_obj.jobnum.pass_gen()}"
+        e_msg = EmailMessage(
+            subject=email_subject,
+            body=email_body,
+            from_email='seqdhbm@gmail.com',
+            to=[seq_obj.jobnum.submittedby],
+            headers={'Message-ID': 'foo'},
+        )
+        e_msg.send(fail_silently=False)
 
 
 # Scheduled in the file celery.py
@@ -137,7 +172,7 @@ def check_for_pending_sequences():
     """
     GIVEN: The website is running.
     WHEN: Periodically, scheduled.
-    THEN: Reads if there are any pending sequence. Try to read from the WESA server and
+    THEN: If there are any pending sequence, try to read from the WESA server and
     update the records in the database.
 
     :return: A message to the Queue Handler

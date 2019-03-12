@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from django import forms
+from django.conf import settings
 
 
 class SeqSubmission(forms.Form):
@@ -27,10 +28,15 @@ class SeqSubmission(forms.Form):
 
         cleaned_data = super().clean()
         msg = "No sequence was provided for analysis!"
+        big_file_msg = f"Please, keep file size under " +\
+                       f"{settings.MAX_FILE_SIZE/1024} KB"
         if not cleaned_data.get("rawseq") and\
            not cleaned_data.get("fastafiles"):
             self.add_error("rawseq", msg)
             self.add_error("fastafiles", msg)
+        if cleaned_data.get("fastafiles") and \
+                self.cleaned_data["fastafiles"].size > settings.MAX_FILE_SIZE:
+            self.add_error("fastafiles", big_file_msg)
         if cleaned_data.get("rawseq") and cleaned_data.get("rawseq")[0]==">":
             self.add_error("rawseq", "Warning: Please remove the fasta header")
             self.add_error("rawseq", "Note: For processing multiple sequences, please use the file upload functionality")

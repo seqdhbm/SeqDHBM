@@ -4,14 +4,16 @@ import logging
 import os
 import re
 import time
+import unittest
 
 from django.conf import settings
+from django.test import TestCase
 from prettytable import PrettyTable
 
 from seqdhbm import fasta
 
 
-def sequence_validity_check(current_sequence_list):
+def sequence_validity_check(current_sequence_list: str) -> int:
     """Takes a list of characters and checks if each element in the list is part of the 20 standard amino acids
 
     Return a flag value based on the number of errors in the input
@@ -26,9 +28,8 @@ def sequence_validity_check(current_sequence_list):
     return flag
 
 
-def mylog(lvl, buffer, line):
-    """
-    Stores messages to produce the full analysis and logs them, when necessary.
+def mylog(lvl, buffer: list, line: str):
+    """Stores messages to produce the full analysis and logs them, when necessary.
     Should save into a file and print for the standard output.
 
     :param lvl: The log level (debug, info, warning, ...)
@@ -41,9 +42,8 @@ def mylog(lvl, buffer, line):
     buffer += [line]
 
 
-def build_ninemer_slice(seq: str, ind: int):
-    """
-    Return the 9mer sequence corresponding to the given sequence and to the index of the coordinating amino acid.
+def build_ninemer_slice(seq: str, ind: int) -> str:
+    """Return the 9mer sequence corresponding to the given sequence and to the index of the coordinating amino acid.
     If the index points to the terminals of the sequence. add an appropriate number of amino acids
     add a filler character (_).
 
@@ -59,9 +59,8 @@ def build_ninemer_slice(seq: str, ind: int):
     return ninemer
 
 
-def check_basic_adjacent(ninemer_sequence):
-    """
-    Check if there are basic amino acids in the 9mer other than the coordinating AA
+def check_basic_adjacent(ninemer_sequence: str) -> str:
+    """Check if there are basic amino acids in the 9mer other than the coordinating AA
 
     :param ninemer_sequence: 9mer sequence
     :return: 'y' if a positively charged amino acid was found, otherwise 'n'
@@ -73,9 +72,8 @@ def check_basic_adjacent(ninemer_sequence):
     return "n"
 
 
-def check_net_charge(ninemer_sequence):
-    """
-    Compute the net charge on the motif
+def get_net_charge(ninemer_sequence:str):
+    """Compute the net charge on the motif
 
     :param ninemer_sequence: The 9mer
     :return: The charge value of the 9mer
@@ -91,9 +89,8 @@ def check_net_charge(ninemer_sequence):
     return net_charge
 
 
-def ship_seq_to_wesa2(seq, seq_pk):
-    """
-    Simply ships the sequence to wesa using an standardized jobname.
+def ship_seq_to_wesa2(seq: str, seq_pk: int):
+    """Simply ships the sequence to wesa using an standardized jobname.
 
     :param seq: The sequence chain.
     :param seq_pk: The identifier of the sequence
@@ -119,8 +116,7 @@ def ship_seq_to_wesa2(seq, seq_pk):
 
 
 def get_results_from_wesa(seq_pk):
-    """
-    Checks the WESA server if the results are ready.
+    """Checks the WESA server if the results are ready.
 
     :param seq_pk: The identifier of the sequence
     :return: When ready, a dictionary with the position of each aa (keys) and the surface accessibility,
@@ -167,8 +163,7 @@ def get_results_from_wesa(seq_pk):
 
 
 def disulfide_bond_check(ninemer, cys_cnt):
-    """
-    Checks if the ninemer contains a non-coordinating Cys a.a. and there is another Cys in the protein.
+    """Checks if the ninemer contains a non-coordinating Cys a.a. and there is another Cys in the protein.
 
     :param ninemer: The 9mer being analysed
     :param cys_cnt: The number of Cys in the whole chain
@@ -177,9 +172,8 @@ def disulfide_bond_check(ninemer, cys_cnt):
     return "Possible S-S Bond" if (cys_cnt > 1 and ("C" in ninemer[:4]+ninemer[5:])) else " "*17
 
 
-def spot_coordination_site(fasta_dict, seq_id, mode):
-    """
-    Analyse the sequence for transient binding sites.
+def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
+    """Analyse the sequence for transient binding sites.
     1. Find Cys, His or Tyr
     2. Check if the adjacency is basic
     3. If the solvent accessibility has to be predicted, submit the sequence to the WESA service
@@ -263,7 +257,6 @@ def spot_coordination_site(fasta_dict, seq_id, mode):
         basic_adj_list = []  # Initialize an empty list to collect the flags when the check for basic adjacent
         # amino acids is done. Values will be either yes or no.
         dict_for_net_charge_calc = {}  # 9mer motifs that PASS the basic adjacency test are populated here
-        pass_charge_dict = {}  # contains 9 mers that have passed the net positive charge check
         pass_charge_out_dict = {}
         # for comparison with the WESA output
         output[header] = {
@@ -277,26 +270,16 @@ def spot_coordination_site(fasta_dict, seq_id, mode):
         ###############################
         # Check for coodinating sites #
         ###############################
-        mylog(logging.INFO, usrout, "-" * 80)
-        mylog(logging.INFO, usrout, "WORKING ON THE VALID SEQUENCE: "+header[1:])
-        mylog(logging.INFO, usrout, "-" * 80)
-        mylog(logging.INFO, usrout, "\n".join(fasta.break_fasta_sequence(current_sequence)))
-        mylog(logging.INFO, usrout, "-" * 30)
-        mylog(logging.INFO, usrout, "HEME COORDINATION SITE CHECK:")
-        mylog(logging.INFO, usrout, "-" * 30)
+        coord_site_count, cys_count, his_count, tyr_count = precheck_coordinating_sites(current_sequence,
+                                                                                        header,
+                                                                                        usrout)
 
-        current_sequence_length = len(current_sequence)
-        cys_count = current_sequence.count('C')
-        his_count = current_sequence.count('H')
-        tyr_count = current_sequence.count('Y')
-        coordination_site_count = cys_count + his_count + tyr_count
-
-        if coordination_site_count > 0:
+        if coord_site_count:
             seq_with_coord += 1
             mylog(logging.INFO, usrout, "NOTE : Heme coordination check PASS!")
-            mylog(logging.INFO, usrout, "Length of sequence: "+ str(current_sequence_length))
+            mylog(logging.INFO, usrout, f"Length of sequence: {len(current_sequence)}")
             mylog(logging.INFO, usrout, f"Total number of potential coordination " +
-                                        f"sites found: {coordination_site_count}")
+                                        f"sites found: {coord_site_count}")
             mylog(logging.INFO, usrout, "Number of potential CYS based sites: "+str(cys_count))
             mylog(logging.INFO, usrout, "Number of potential HIS based sites: "+str(his_count))
             mylog(logging.INFO, usrout, "Number of potential TYR based sites: "+str(tyr_count)+"\n")
@@ -316,13 +299,12 @@ def spot_coordination_site(fasta_dict, seq_id, mode):
 
             if len(coord_site_index_list) == len(initial_ninemer_dict):  # Final record of the initial_NinemerDict{}
                 mylog(logging.INFO, usrout, "NOTE : Successfully built 9mer motifs for all the " +
-                      str(coordination_site_count) + " potential coordination sites !")
+                      str(coord_site_count) + " potential coordination sites !")
                 mylog(logging.INFO, usrout, "-" * 50)
 
             #######################
             # Check for CP motifs #
             #######################
-
             cp_motif = {}  # This dictionary will skip basic adjacency
             for aa, ninemer in initial_ninemer_dict.items():
                 # check if the coordinating aa is Cysteine
@@ -336,6 +318,7 @@ def spot_coordination_site(fasta_dict, seq_id, mode):
             ###############################
             # Check for basic amino acids #
             ###############################
+            # TODO Ask if we still to look for adjacent basic aa now that we are accepting Cys based and CP motifs
             mylog(logging.INFO, usrout, "ADJACENT BASIC AMINO ACID CHECK:")
             mylog(logging.INFO, usrout, "-" * 35)
             mylog(logging.INFO, usrout, "NOTE : Screening all potential motifs for adjacent basic amino acids")
@@ -349,7 +332,7 @@ def spot_coordination_site(fasta_dict, seq_id, mode):
 
             if count_basic_adj_ninemer > 0:
                 mylog(logging.INFO, usrout, "NOTE : %d out of the %d 9mers PASS the adjacent basic amino acids check" %
-                      (count_basic_adj_ninemer, coordination_site_count))
+                      (count_basic_adj_ninemer, coord_site_count))
                 if len(dict_for_net_charge_calc)-count_basic_adj_ninemer:
                     mylog(logging.INFO,
                           usrout,
@@ -358,7 +341,7 @@ def spot_coordination_site(fasta_dict, seq_id, mode):
                 mylog(logging.INFO, usrout, "NOTE : These %d " % len(dict_for_net_charge_calc) +
                                             "9mers will be used in the next step to check for positive net charge")
             elif dict_for_net_charge_calc:
-                mylog(logging.INFO, usrout, "NOTE : None of the %d " % coordination_site_count +
+                mylog(logging.INFO, usrout, "NOTE : None of the %d " % coord_site_count +
                                             "9mers passed the adjacent basic amino acids check")
                 mylog(logging.INFO, usrout, "NOTE : %d 9mers coordinated by Cysteine " % len(dict_for_net_charge_calc) +
                                             "will be used in the next step to check for net charge")
@@ -376,44 +359,9 @@ def spot_coordination_site(fasta_dict, seq_id, mode):
                 mylog(logging.INFO, usrout, "-" * 50)
                 continue
 
-            ####################
-            # NET CHARGE CHECK #
-            ####################
-            mylog(logging.INFO, usrout, "-" * 35)
-            mylog(logging.INFO, usrout, "NET CHARGE CHECK:")
-            mylog(logging.INFO, usrout, "-" * 35)
-            mylog(logging.INFO, usrout, "NOTE : Checking net charge on the individual 9mer motifs")
-            mylog(logging.INFO, usrout, "NOTE : An individual motif PASSES this check:")
-            mylog(logging.INFO, usrout, "       if it's net charge is positive")
-            mylog(logging.INFO, usrout, "       if it's neutral, but it is a CYS BASED motif")
-            mylog(logging.INFO, usrout, "       It's a CP coordinated motif")
-            for d in dict_for_net_charge_calc:
-                charge = check_net_charge(dict_for_net_charge_calc[d])
-                if charge > 0:
-                    pass_charge_dict[d] = dict_for_net_charge_calc[d]
-                    pass_charge_out_dict[d] = "+"+str(charge)
-                elif charge == 0 and d[0] == "C":
-                    pass_charge_dict[d] = dict_for_net_charge_calc[d]
-                    pass_charge_out_dict[d] = str(charge)+"(CYS motif)"
-                elif d in cp_motif:
-                    pass_charge_dict[d] = dict_for_net_charge_calc[d]
-                    pass_charge_out_dict[d] = str(charge)+"(CP motif)"
+            # NET CHARGE CHECK
+            pass_charge_dict = net_charge_check(cp_motif, dict_for_net_charge_calc, pass_charge_out_dict, usrout)
 
-            mylog(
-                logging.INFO,
-                usrout,
-                (f"NOTE : {len(pass_charge_dict)} out of " +
-                 f"{len(dict_for_net_charge_calc)} PASS the net charge check!")
-            )
-            # Additional coordination site check
-            mylog(logging.INFO, usrout, "-" * 50)
-            mylog(logging.INFO, usrout, "ADDITIONAL COORDINATION SITE CHECK")
-            mylog(logging.INFO, usrout, "-" * 50)
-            mylog(
-                logging.INFO,
-                usrout,
-                "NOTE : Checking the presence of additional coordination sites"
-            )
             if len(pass_charge_dict) > 1:
                 mylog(logging.INFO, usrout, "NOTE : Additional coordination site check: PASS")
                 mylog(logging.INFO, usrout, "NOTE : Proceeding to check spacer length between coordination sites")
@@ -431,57 +379,18 @@ def spot_coordination_site(fasta_dict, seq_id, mode):
                 ]
                 continue
 
-            ###################
-            # Spacer distance #
-            ###################
             # (Re-add when necessary)
             # spacer_dict = spacer_check(pass_charge_dict, pass_charge_index_list, spacer_dict)
 
-            ##########################
-            # WESA (in)compatibility #
-            ##########################
             # WESA supports only sequences with length up to 2000
-            if (mode == "wesa") and (current_sequence_length > max_seq_length_for_wesa):
-                mylog(logging.WARNING, usrout, "-" * 50)
-                mylog(logging.WARNING, usrout, "Warning:")
-                msg1 = f"Structure prediction by the WESA server" +\
-                       f" supports sequences with length up to" +\
-                       f" {max_seq_length_for_wesa} amino acids"
-                msg2 = f"This sequence has {current_sequence_length} a.a. " + \
-                       f"and is not supported."
-                for msg in [msg1, msg2]:
-                    output[header]["warnings"] += [msg]
-                    mylog(logging.WARNING, usrout, msg)
-                output[header]["mode"] = "structure"
+            if (mode == "wesa") and (len(current_sequence) > max_seq_length_for_wesa):
+                inform_wesa_incompatibility(len(current_sequence), header, max_seq_length_for_wesa, output, usrout)
 
-            ##########################
-            # WESA is not being used #
-            ##########################
-            if (mode == "structure") or (current_sequence_length > max_seq_length_for_wesa):
-                # All checks done, preparing tabular summary
-                """Prepare output lists for PrettyTable"""
-                mylog(logging.INFO, usrout, "*" * 80)
-                mylog(logging.INFO, usrout, "TABULAR SUMMARY")
-                mylog(logging.INFO, usrout, "NOTE : Please use the available structure "
-                                            "information to only consider those motifs that are \"surface exposed\"")
-                table = PrettyTable(["S.no", "Coord. residue", "9mer motif", "Net charge", "Comment", "Kd or strength"])
-                sr_no = 0
-                output[header]["result"] = {}
-                for coord in sorted(pass_charge_dict.keys(), key=lambda x: int(x[1:])):
-                    output[header]["result"][coord] = {"ninemer": pass_charge_dict[coord],
-                                                       "netcharge": pass_charge_out_dict[coord],
-                                                       "comment": disulfide_bond_check(pass_charge_dict[coord],
-                                                                                       cys_count)}
-                    sr_no += 1
-                    table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_dict[coord],
-                                   disulfide_bond_check(pass_charge_dict[coord], cys_count), ""])
-                mylog(logging.INFO, usrout, str(table))
-            output[header]["analysis"] = "\n".join(usrout)
-
-            ######################
-            # WESA is being used #
-            ######################
-            if (mode == "wesa") and (current_sequence_length <= max_seq_length_for_wesa):
+            if (mode == "structure") or (len(current_sequence) > max_seq_length_for_wesa):
+                # structure
+                save_results_structure_mode(cys_count, header, output, pass_charge_dict, pass_charge_out_dict, usrout)
+            else:
+                # WESA
                 mylog(logging.INFO, usrout, "Sending sequence to the WESA server for solvent accessibility prediction")
                 ship_seq_to_wesa2(current_sequence, seq_id)
                 output[header]["result"] = {}
@@ -490,22 +399,115 @@ def spot_coordination_site(fasta_dict, seq_id, mode):
                                                        "netcharge": pass_charge_out_dict[coord],
                                                        "comment": disulfide_bond_check(pass_charge_dict[coord],
                                                                                        cys_count)}
-                output[header]["analysis"] = "\n".join(usrout)
+            output[header]["analysis"] = "\n".join(usrout)
 
         else:  # When there are no coordinating sites in the sequence
-            mylog(logging.INFO, usrout, "-" * 80)
-            msg1 = "NOTE : The sequence does not have potential heme coordination sites(C, H, Y) !!"
-            msg2 = "It is very likely that this sequence does not bind/coordinate heme"
-            for msg in [msg1, msg2]:
-                output[header]["warnings"] += [msg]
-                mylog(logging.INFO, usrout, msg)
+            no_coord_site_warning(header, output, usrout)
             return output
     return output
 
 
+def precheck_coordinating_sites(current_sequence: str, header: str, usrout: list):
+    """counts C, H and Y. Add that information to the full analysis"""
+    mylog(logging.INFO, usrout, "-" * 80)
+    mylog(logging.INFO, usrout, "WORKING ON THE VALID SEQUENCE: " + header[1:])
+    mylog(logging.INFO, usrout, "-" * 80)
+    mylog(logging.INFO, usrout, "\n".join(fasta.break_fasta_sequence(current_sequence)))
+    mylog(logging.INFO, usrout, "-" * 30)
+    mylog(logging.INFO, usrout, "HEME COORDINATION SITE CHECK:")
+    mylog(logging.INFO, usrout, "-" * 30)
+    cys_count = current_sequence.count('C')
+    his_count = current_sequence.count('H')
+    tyr_count = current_sequence.count('Y')
+    coordination_site_count = cys_count + his_count + tyr_count
+    return coordination_site_count, cys_count, his_count, tyr_count
+
+
+def net_charge_check(cp_motif, dict_for_net_charge_calc, pass_charge_out_dict, usrout):
+    mylog(logging.INFO, usrout, "-" * 35)
+    mylog(logging.INFO, usrout, "NET CHARGE CHECK:")
+    mylog(logging.INFO, usrout, "-" * 35)
+    mylog(logging.INFO, usrout, "NOTE : Checking net charge on the individual 9mer motifs")
+    mylog(logging.INFO, usrout, "NOTE : An individual motif PASSES this check:")
+    mylog(logging.INFO, usrout, "       if it's net charge is positive")
+    mylog(logging.INFO, usrout, "       if it's neutral, but it is a CYS BASED motif")
+    mylog(logging.INFO, usrout, "       It's a CP coordinated motif")
+    pass_charge_dict = {}  # contains 9 mers that have passed the net positive charge check
+    for d in dict_for_net_charge_calc:
+        charge = get_net_charge(dict_for_net_charge_calc[d])
+        if charge > 0:
+            pass_charge_dict[d] = dict_for_net_charge_calc[d]
+            pass_charge_out_dict[d] = "+" + str(charge)
+        elif charge == 0 and d[0] == "C":
+            pass_charge_dict[d] = dict_for_net_charge_calc[d]
+            pass_charge_out_dict[d] = str(charge) + "(CYS motif)"
+        elif d in cp_motif:
+            pass_charge_dict[d] = dict_for_net_charge_calc[d]
+            pass_charge_out_dict[d] = str(charge) + "(CP motif)"
+    mylog(
+        logging.INFO,
+        usrout,
+        (f"NOTE : {len(pass_charge_dict)} out of " +
+         f"{len(dict_for_net_charge_calc)} PASS the net charge check!")
+    )
+    # Additional coordination site check
+    mylog(logging.INFO, usrout, "-" * 50)
+    mylog(logging.INFO, usrout, "ADDITIONAL COORDINATION SITE CHECK")
+    mylog(logging.INFO, usrout, "-" * 50)
+    mylog(
+        logging.INFO,
+        usrout,
+        "NOTE : Checking the presence of additional coordination sites"
+    )
+    return pass_charge_dict
+
+
+def inform_wesa_incompatibility(current_sequence_length, header, max_seq_length_for_wesa, output, usrout):
+    mylog(logging.WARNING, usrout, "-" * 50)
+    mylog(logging.WARNING, usrout, "Warning:")
+    msg1 = f"Structure prediction by the WESA server" + \
+           f" supports sequences with length up to" + \
+           f" {max_seq_length_for_wesa} amino acids"
+    msg2 = f"This sequence has {current_sequence_length} a.a. " + \
+           f"and is not supported."
+    for msg in [msg1, msg2]:
+        output[header]["warnings"] += [msg]
+        mylog(logging.WARNING, usrout, msg)
+    output[header]["mode"] = "structure"
+
+
+def save_results_structure_mode(cys_count, header, output, pass_charge_dict, pass_charge_out_dict, usrout):
+    # All checks done, preparing tabular summary
+    """Prepare output lists for PrettyTable"""
+    mylog(logging.INFO, usrout, "*" * 80)
+    mylog(logging.INFO, usrout, "TABULAR SUMMARY")
+    mylog(logging.INFO, usrout, "NOTE : Please use the available structure "
+                                "information to only consider those motifs that are \"surface exposed\"")
+    table = PrettyTable(["S.no", "Coord. residue", "9mer motif", "Net charge", "Comment", "Kd or strength"])
+    sr_no = 0
+    output[header]["result"] = {}
+    for coord in sorted(pass_charge_dict.keys(), key=lambda x: int(x[1:])):
+        output[header]["result"][coord] = {"ninemer": pass_charge_dict[coord],
+                                           "netcharge": pass_charge_out_dict[coord],
+                                           "comment": disulfide_bond_check(pass_charge_dict[coord],
+                                                                           cys_count)}
+        sr_no += 1
+        table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_dict[coord],
+                       disulfide_bond_check(pass_charge_dict[coord], cys_count), ""])
+    mylog(logging.INFO, usrout, str(table))
+
+
+def no_coord_site_warning(header, output, usrout):
+    mylog(logging.INFO, usrout, "-" * 80)
+    msg1 = "NOTE : The sequence does not have potential heme coordination sites(C, H, Y) !!"
+    msg2 = "It is very likely that this sequence does not bind/coordinate heme"
+    for msg in [msg1, msg2]:
+        output[header]["warnings"] += [msg]
+        mylog(logging.INFO, usrout, msg)
+
+
 def spacer_check(pass_charge_dict, pass_charge_index_list):
-    """
-    Checks for spacer distance.
+    """Checks for spacer distance.
 
     :param pass_charge_dict:
     :param pass_charge_index_list:

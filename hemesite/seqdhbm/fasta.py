@@ -25,7 +25,7 @@ def fasta_to_seq2(in_file, jobfolder="J0"):
     for i in lines:
         if i and i[0] == '>':
             # Header found
-            if seq:   # if seq is empty, this might be the first line of the file
+            if seq:  # if seq is empty, this might be the 1st line of the file
                 # get the first section of the header, hopefully the ID
                 result += [{"name": head[1:],
                             "seq":seq,
