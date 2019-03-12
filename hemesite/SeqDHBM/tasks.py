@@ -1,21 +1,29 @@
-# Create your tasks here
+# coding: utf-8
+
+"""Asynchronous functions."""
+
 from __future__ import absolute_import, unicode_literals
+import time
+
 from celery import shared_task
 from celery.task import task
 from django.core.mail import EmailMessage
 from prettytable import PrettyTable
 from seqdhbm import fasta
 from seqdhbm import SeqDHBM
+
 from SeqDHBM import models
-import time
+
+__all__ = ['assync_organize_seq', 'assync_save_results', 'access_wesa', 'check_for_pending_sequences']
 
 # About Celery
 # # http://docs.celeryproject.org/en/latest/django/first-steps-with-django.html
 # # http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html#first-steps
-# hemesitefolder$ celery -A hemesite worker -l debug --concurrency=15
-# hemesitefolder$ celery -A hemesite worker -l debug --concurrency=1 -Q wesa,celery
-# hemesitefolder$ celery -A hemesite beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+# hemesitefolder$ celery -A hemesite worker --detach -l debug --concurrency=15
+# hemesitefolder$ celery -A hemesite worker --detach -l debug --concurrency=1 -Q wesa,celery
+# hemesitefolder$ celery -A hemesite beat --detach -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 # https://www.youtube.com/watch?v=VoTxTM6kBuU&list=RDEM7S2Y1zXF-I77fRXilXb6Ew&index=27
+
 
 @shared_task
 def assync_organize_seq(seq_list):
@@ -64,7 +72,7 @@ def assync_save_results(seq_idx, results_dict):
 def access_wesa(seq_idx):
     """
     GIVEN: There are sequences in the database with pending WESA analysis.
-    WHEN: Periodically, scheduled.
+    WHEN: Periodically, scheduled in celery beat.
     THEN: Check if the results are ready in the WESA repository and update the records.
 
     :param seq_idx: the id of the sequence record in the db
@@ -72,7 +80,7 @@ def access_wesa(seq_idx):
 
     # check if the result is ready
     try:
-        wesa_result = SeqDHBM.GetResultsFromWESA(seq_idx)
+        wesa_result = SeqDHBM.get_results_from_wesa(seq_idx)
         if wesa_result:
             for result in models.Result_HBM.objects.filter(sequence=seq_idx):
                 # check if the coordinating aa is not exposed
@@ -83,25 +91,11 @@ def access_wesa(seq_idx):
             results = models.Result_HBM.objects.filter(sequence=seq_idx)
             if results:  # Check if there is any ninemer left
                 # results.sort(key=lambda x: x.coord_atom[1:])
-                table = PrettyTable([
-                    "S.no",
-                    "Coord. residue",
-                    "9mer motif",
-                    "Net charge",
-                    "Comment",
-                    "Kd or strength"])  # TODO Predicted Kd? Strength as another field?
-                for pos, record in enumerate(sorted(results, key=lambda x: x.coord_atom[1:])):
-                    table.add_row([pos+1,
-                                   record.coord_atom,
-                                   record.ninemer,
-                                   record.net_charge,
-                                   "Possible S-S Bond" if record.disulfide_possible else " "*17,
-                                   ""])
-                seq_obj.partial_hbm_analysis += "\n" + str(table)
+                seq_obj.partial_hbm_analysis += "\n" + result_to_pretty_table(results)
             else:
                 # and add the warning if they are all buried
                 seq_obj.partial_hbm_analysis += f"\n{'*' * 80}\n"
-                seq_obj.partial_hbm_analysis += "\nNOTE : THE SEQUENCE HAS NO SOLVENT ACCESSIBLE COORDINATION RESIDUES !\n"
+                seq_obj.partial_hbm_analysis += "NOTE: THE SEQUENCE HAS NO SOLVENT ACCESSIBLE COORDINATION RESIDUES !\n"
                 seq_obj.partial_hbm_analysis += "*" * 80
                 seq_obj.warnings_hbm += "\nThe sequence has no solvent accessible coordination residues"
             seq_obj.status_hbm = models.Sequence.STATUS_PROCESSED
@@ -110,30 +104,12 @@ def access_wesa(seq_idx):
             return
     except AssertionError as e:
         seq_obj = models.Sequence.objects.get(pk=seq_idx)
-        seq_obj.partial_hbm_analysis += f"\n{'*' * 80}"
-        seq_obj.partial_hbm_analysis += f"\n Unexpected WESA Error: {e}"
-        seq_obj.partial_hbm_analysis += "\n Try again after a while"
+        seq_obj.partial_hbm_analysis += f"\n{'*' * 80}\n Unexpected WESA Error: {e}\n Try again after a while"
         results = models.Result_HBM.objects.filter(sequence=seq_idx)
         if results:  # Check if there is any ninemer left
-            seq_obj.partial_hbm_analysis += f"\n{'*' * 80}"
-            seq_obj.partial_hbm_analysis += f"\nShowing the results without solvent accessibility analysis"
-            table = PrettyTable([
-                "S.no",
-                "Coord. residue",
-                "9mer motif",
-                "Net charge",
-                "Comment",
-                "Kd or strength"])  # TODO Predicted Kd? Strength as another field?
-            for pos, record in enumerate(sorted(results, key=lambda x: x.coord_atom[1:])):
-                table.add_row([pos + 1,
-                               record.coord_atom,
-                               record.ninemer,
-                               record.net_charge,
-                               "Possible S-S Bond" if record.disulfide_possible else " " * 17,
-                               ""])
-            seq_obj.partial_hbm_analysis += "\n" + str(table)
-        seq_obj.warnings_hbm += f"\n Unexpected WESA Error: {e}"
-        seq_obj.warnings_hbm += "\n No solvent accessibility prediction could be done."
+            seq_obj.partial_hbm_analysis += f"\n{'*' * 80}\nShowing the results without solvent accessibility analysis"
+            seq_obj.partial_hbm_analysis += "\n" + result_to_pretty_table(results)
+        seq_obj.warnings_hbm += f"\n Unexpected WESA Error: {e}\n No solvent accessibility prediction could be done."
         seq_obj.status_hbm = models.Sequence.STATUS_FAILED
         seq_obj.save()
 
@@ -173,3 +149,28 @@ def check_for_pending_sequences():
     for seq in queryset:
         access_wesa.delay(seq.id)
     return f"There were {len(queryset)} sequences pending"
+
+
+def result_to_pretty_table(results):
+    """
+    Formats the result as a pretty table
+
+    :param results: Results object
+    :return: A pretty table with the analysis
+    """
+
+    table = PrettyTable([
+        "S.no",
+        "Coord. residue",
+        "9mer motif",
+        "Net charge",
+        "Comment",
+        "Kd or strength"])  # TODO Predicted Kd? Strength as another field?
+    for pos, record in enumerate(sorted(results, key=lambda x: int(x.coord_atom[1:]))):
+        table.add_row([pos + 1,
+                       record.coord_atom,
+                       record.ninemer,
+                       record.net_charge,
+                       "Possible S-S Bond" if record.disulfide_possible else " " * 17,
+                       ""])
+    return str(table)

@@ -1,4 +1,7 @@
+# coding: utf-8
+
 from django import forms
+
 
 class SeqSubmission(forms.Form):
     emaillabel = "Enter a valid email address to receive the complete \
@@ -21,6 +24,8 @@ class SeqSubmission(forms.Form):
                             choices=CHOICES, initial="structure", widget=forms.RadioSelect())
     
     def clean(self):
+        """Checks if the form was filled correctly."""
+
         cleaned_data = super().clean()
         msg = "No sequence was provided for analysis!"
         if not cleaned_data.get("rawseq") and\
@@ -28,8 +33,7 @@ class SeqSubmission(forms.Form):
             self.add_error("rawseq", msg)
             self.add_error("fastafiles", msg)
         if cleaned_data.get("rawseq") and cleaned_data.get("rawseq")[0]==">":
-         self.add_error("rawseq", "Warning: Please remove the fasta header")
-         self.add_error("rawseq", "Note: For processing multiple sequences, please use the file upload functionality")
-        # i can check if the email is empty for WESA here
+            self.add_error("rawseq", "Warning: Please remove the fasta header")
+            self.add_error("rawseq", "Note: For processing multiple sequences, please use the file upload functionality")
         if (not cleaned_data.get("email")) and cleaned_data.get("mode") == "wesa":
             self.add_error("email", "Email is mandatory when using WESA predictions")

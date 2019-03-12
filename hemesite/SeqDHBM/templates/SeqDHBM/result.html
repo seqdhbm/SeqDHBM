@@ -72,8 +72,10 @@ body{
           {% for line in seqchain %}
            <p> {{ line }}</p>
            {% endfor %}
-        </font>
-        {% if seq.result_hbm_set.all|length %}
+        </font><i>
+        {% if seq.mode == "W" %}<p>Solvent accessibility predicted by WESA</p>{% endif %}
+        {% if seq.mode == "S" %}<p>No solvent accessibility prediction</p>{% endif %}
+        {% if seq.result_hbm_set.all|length %}</i>
         <table>
           <tr>
             <th>S.No</th>

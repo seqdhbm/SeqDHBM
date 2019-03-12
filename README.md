@@ -12,9 +12,12 @@
   - pip install celery 
   - pip install django_celery_beat
   - pip install Flask-SQLAlchemy
-- If there is a problem, install django celery results
+- If there is a problem, install django celery results...
   - pip install django-celery-results
   - python manage.py migrate django_celery_results
+- ... and update the database model
+  - python manage.py makemigrations
+  - python manage.py migrate
 - Set the environment variable for the seqdhbm package;
 - Run celery using hemesitefolder$ celery -A hemesite worker -l info;
 - Also create a file to protect the password at hemesite/pass.env. An example was created at ./example_pass.env.

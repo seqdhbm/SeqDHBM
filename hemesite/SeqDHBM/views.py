@@ -1,24 +1,29 @@
+# coding: utf-8
+
+"""Functions that handles requests from users"""
+
 from __future__ import absolute_import, unicode_literals
+
 from django.conf import settings
-from django.core.mail import EmailMessage
 from django.http import HttpResponse, Http404
-from django.shortcuts import get_object_or_404, get_list_or_404, redirect
+from django.shortcuts import (
+    get_object_or_404, get_list_or_404, redirect
+)
 from django.template import loader
+
 from .forms import SeqSubmission
-import seqdhbm.workflow as wf
+from .views_utils import process_form
 from SeqDHBM import models
-import os
 
 # DOING tasks.check_for_pending_sequences
-# TODO Ask Ajay to test the wesa
-# TODO Model a db for the group's sequences
-# TODO write if the sequence was predicted by wesa or not.. show results and red message
-# TODO check for errors in the html
-# TODO check if the sequence has the minimum size for wesa
+# TEST write if the sequence was predicted by wesa or not..
+# DONE show results and red message
+# DONE: start celery as a daemon:
+#  http://docs.celeryproject.org/en/latest/userguide/daemonizing.html#daemonizing
 # TODO Upgrade the software to use yasara
 # TODO Read papers from the Bioinformatics Journals
 # TODO setup a different sgbd/web server (GUnicorn / apache)
-# TODO Minor adjustments (require the email to be from university, security measures -> requires apache)
+# TODO Model a db for the group's sequences
 # DONE: use the timestamp to protect the results
 # DONE NEXT: Database
 #            -  WESA queue
@@ -34,25 +39,6 @@ import os
 #            -  validate if the email is filled when wesa is being used
 # Future: celery has a 'chain' function that might be handy to pipe the
 #    homology -> docking -> md process
-# Future: start celery as a daemon:
-#  http://docs.celeryproject.org/en/latest/userguide/daemonizing.html#daemonizing
-# Future: read about security: https://docs.djangoproject.com/en/2.1/topics/security/#user-uploaded-content-security
-# Future: check a service to verify if the email belongs to an academic institution
-
-
-def handle_uploaded_file(f, filename):
-    """
-    WHEN: The user submits a form using a POST method.
-    GIVEN: The FILES section of the form is not empty.
-    THEN: download the files, so they can be processed.
-
-    :param f: the binary information sent in the form.
-    :param filename: the file path to save the file
-    """
-
-    with open(filename, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
 
 
 def index(request):
@@ -70,53 +56,10 @@ def index(request):
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
         form = SeqSubmission(request.POST, request.FILES)
-
         debugging = form.non_field_errors()
-        # check whether it's valid:
         if form.is_valid():
-            email = form.cleaned_data['email'] if form.cleaned_data['email'] else ""
-            # Create the job in the database
-            myjob = models.Job(submittedby=email)
-            myjob.save()
-            jobfolder = os.path.join(settings.BASE_DIR, "jobs/J%07d/" % myjob.id)
-            os.makedirs(jobfolder, exist_ok=True)
-            # obtain the fastafile
-            if "fastafiles" in request.FILES:
-                fastafile = request.FILES['fastafiles'].name
-                fastafilepath = os.path.join(jobfolder, request.FILES['fastafiles'].name)
-                handle_uploaded_file(request.FILES['fastafiles'], fastafilepath)
-            else:
-                fastafile = ""
-            # Obtain the manual input and clean it
-            rawseq = "".join(form.cleaned_data['rawseq'].split("\n"))
-            rawseq = "".join(rawseq.split())
-            rawseq = "".join(rawseq.split("\r"))
-
-            # run the workflow seqdhbm analysis for the current inputs
-            result = wf.workflow(jobfolder=jobfolder,
-                                 rawseq=rawseq,
-                                 fastafile=fastafile,
-                                 job=myjob,
-                                 mode=form.cleaned_data["mode"]
-                                 )
-
-            # Update the full analysis of the job using the
-            myjob.set_full_hbm_analysis([x["analysis"] for x in result])
-            # if all went well, send the email to the user
-            # https://docs.djangoproject.com/en/2.1/topics/email/#django.core.mail.EmailMessage
-            email = form.cleaned_data['email']
-            password = myjob.pass_gen()
-            if email:
-                body = "You can access the analysis at http://localhost:8000/SeqDHBM/%d/%s" % (myjob.id, password)
-                e_msg = EmailMessage(
-                    subject=f'SeqD-HBM: Your analysis number {myjob.id}',
-                    body=body,
-                    from_email='seqdhbm@gmail.com',
-                    to=[email],
-                    headers={'Message-ID': 'foo'},
-                )
-                e_msg.send(fail_silently=False)
-            return redirect("%d/%s" % (myjob.id, password))
+            job_id, password = process_form(form, request.FILES)
+            return redirect("%d/%s" % (job_id, password))
     # if a GET (or any other method) we'll create a blank form
     else:
         form = SeqSubmission()
@@ -164,7 +107,7 @@ def show_analysis(request, job_id, passw: str = ""):
     """
     WHEN: The user requests information about a job he submitted.
     GIVEN: The job exists.
-    THEN: The full analysis of the job is presented to the user as a text webpage.
+    THEN: The full analysis of the job is presented to the user as a plain text webpage.
 
     :param request: http request
     :param job_id: The identifier of the job
@@ -186,6 +129,9 @@ def hemewf(request, job_id, passw):
     :param request:
     :return:
     """
+
+    if not settings.DEBUG:
+        return Http404()
     message = ""
     for seq in models.Sequence.objects.all():
         message += "<div>"
@@ -209,4 +155,4 @@ def hemewf(request, job_id, passw):
         print(job.id)
         print()
         message += f"\n{request.META}"
-    return HttpResponse(message, content_type="text/plain")
+    return HttpResponse(message)  # , content_type="text/plain")

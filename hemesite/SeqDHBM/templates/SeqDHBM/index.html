@@ -62,7 +62,7 @@ Please Note : Sequences exceeding 2000 residues will not be processed via WESA b
 <ul>
  <li>Tony's paper on motif importance (<a href="brokenlink">question</a>)</li>
 </ul>
-</p>
+</p-->
   <!--p>
     Cite WESA</p-->
 <hr>
@@ -91,7 +91,6 @@ Please Note : Sequences exceeding 2000 residues will not be processed via WESA b
     {% for result in results %}
         <div>
           <H3>  {{ result.name }} </H3>
-          <!--TODO divide the sequence in lines with 70 chars-->
           <p><font size="-1" face= 'Courier New'> {{ result.seq }} </font> </p>
           {% for coord, data in result.result.items %}
               {{ coord }}
@@ -99,7 +98,6 @@ Please Note : Sequences exceeding 2000 residues will not be processed via WESA b
               {{ data.netcharge }}
               {{ data.comment }}
           {% endfor %}
-          <!-- TODO use red for fail -->
           {% for warn in result.warnings %}
             <p> {{ warn }}</p>
           {% endfor %}
