@@ -5,24 +5,25 @@ from django.conf import settings
 
 
 class SeqSubmission(forms.Form):
-    """Django form to submit data for analysis"""
-
-    emaillabel = "Enter your email address to receive the complete \
-    analysis of the submitted sequences. As the structure prediction \
-    can take a long time (from 5 to 90 minutes). This is mandatory if\
-    you want the structure to be predicted:"
+    emaillabel = "Enter a valid email address to receive the complete \
+    results for the submitted sequence(s). Email entry is MANDATORY in \
+    cases where WESA solvent accessibility predictions are requested"
     email = forms.EmailField(label=emaillabel,
                              required=False)
     # pdbfiles = forms.FileField(label="PDB files")
-    fastafiles = forms.FileField(label="Fasta files",
+    fastafiles = forms.FileField(label="Select a local fasta file. Fasta files can contain multiple \
+        sequences placed one below the other provided individual sequences are separated by valid fasta headers",
                                  required=False)
-    rawseq = forms.CharField(label='Enter or paste your sequence data (one sequence with no fasta header):',
+    rawseq = forms.CharField(label='Enter your sequence in upper case 1-letter code without fasta headers. \
+        Only the 20 standard amino acids are accepted',
                              widget=forms.Textarea(attrs={'cols': '80', 'rows':'5'}),
                              required=False)
-    CHOICES = [('structure','Skip'),
-               ('wesa','Predict')]
-    mode = forms.ChoiceField(label="WESA?:", choices=CHOICES, initial="structure", widget=forms.RadioSelect())
-
+    CHOICES = [('structure','No, don\'t run WESA'),
+               ('wesa','Yes, run WESA')]
+    message = forms
+    mode = forms.ChoiceField(label="Run WESA solvent accessibility prediction to discard buried residues ?", 
+                            choices=CHOICES, initial="structure", widget=forms.RadioSelect())
+    
     def clean(self):
         """Checks if the form was filled correctly."""
 

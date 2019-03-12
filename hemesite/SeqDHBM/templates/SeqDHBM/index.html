@@ -1,7 +1,21 @@
+<!DOCTYPE html>
+{% load static %}
 <html>
 <head>
   {% load staticfiles %}
   <link rel="icon" href="{% static 'favicon.ico' %}">
+<style>
+body{
+  background-color: lightblue;
+}
+h1 {
+  color: black;
+  text-align: center;
+}
+p.center {
+  text-align: justify;
+  color: black;
+}
 <style>
 table, th, td {
     border: 1px solid black;
@@ -16,34 +30,32 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
 
 </head>
 <body>
-<!--h1>[Seq]uence based [D]etection of [H]eme [B]inding [M]otifs</h1-->
-<h1>epHEMEra</h1>
-<!--<h1>ep<font color="EE0000"><i>HEME</i></font>ra</h1>
-<h1>ep<font color="0000FF"><i>HEME</i></font>ra</h1>
-<h1><font color="0000FF">ep</font><i>HEME</i><font color="0000FF">ra</font></h1>
-<h1>ep<i>HEME</i>ra</h1>
-<h1>ep-Heme-ra</h1> -->
-<p>
-  The term "heme-binding motif" (HBM) is used to describe a protein sequence stretch that may interact with the heme molecule.
-  The evaluation of the binding behavior of a plethora of heme-peptide complexes resulted in the implementation of a prediction tool (EpHEMEra) (SeqD-HBM) for heme-binding
-      motifs which eventually led and will perspectively lead to the identification and verification of so far unknown-heme-regulated proteins.
+<h1>[Seq]uence based [D]etection of [H]eme [B]inding [M]otifs</h1>
+<p class="center">
+ This webpage provides temporary access to our implementation of SeqD-HBM, a computational approach for the prediction of transient heme binding motifs from protein sequences.
 </p>
-<p>
-  A handful of computational tools are available to predict ligand binding to proteins. While these tools use complex algorithms and base their predictions on
-   extracting several novel features, the nature of binding usually described is the strong irreversible binding of heme (mostly within a binding pocket) and
-   not the transient binding of and regulation by heme.
-</p>
-<p>
+<p class="center">
   The program processes the input sequence through a systematic stepwise validation,
   extracting at each step relevant features from the sequence to produce a tabulated list of the possible heme-coordination sites available for the given sequence.
 </p>
-<p>
-  Besides reporting the potential heme-coordination sites, the program additionally outputs the 9mer motifs associated with the coordination site,
-  the charge of the motif and the possibility of a disulfide bridge close to the coordinating atom of the 9mer.
-  This comprehensive output further guides the user to make informed judgments on the nature of heme interaction with the protein of interest.
+<!--img src="/SeqDHBM/static/algotithm_flow.png" alt="SeqD-HBM Algorithm" style="width:500px;height:600px;"-->
+
+<p class="center">
+If you use SeqD-HBM in any part of your work, please cite:<br>
+1. Wißbrock, A., Paul George, A.A., Brewitz, H. H., Kühl, T., Imhof, D. (2019) The Molecular Basis of Transient Heme-Protein Interactions: Analysis, Concept and Implementation. <a href="http://www.bioscirep.org/content/39/1/BSR20181940"><i>Biosci. Rep. 39(1), BSR20181940</i></a><br><br>
+If you use <a href="http://pipe.scs.fsu.edu/wesa/">WESA</a> to perform solvent accessibility checks on your sequence please cite the relevant literature as well.<br>
+1. Chen, H-L and Zhou, H-X. Prediction of solvent accessibility and sites of deleterious mutations from protein sequence. Nucl. Acids Res. 33, 3193-3199 (2005).<br>
+2. Shan, Y., Wang, G., and Zhou, H.-X. Fold recognition and accurate query-template alignment by a combination of PSI-BLAST and threading. Proteins 42, 23-37 (2001).<br>
 </p>
-<p>
-  Further improvements to the interface are a work in progress.
+<p class="center">
+Please Note : Sequences exceeding 2000 residues will not be processed via WESA but the usual SeqD-HBM analysis will be done. Moreover, depending on sequence length, each sequence requires anything between 5 to 30 minutes for processing by WESA.
+</p>
+<p class="center">
+  Further enhancements to the web interface and the underlying logic are a work in progress.
+  For queries regarding SeqD-HBM and the usage of this site please contact Ajay A. Paul George (ajgeorge@uni-bonn.de) 
+</p>
+<p class="center">
+ If our research interests you, please visit our <a href="https://www.pharma.uni-bonn.de/www-en/pharmazeutische-biochemie-und-bioanalytik-en">homepage</a> for further details.
 </p>
 <!--p>
   <b>References:</b>
@@ -54,7 +66,7 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
   <!--p>
     Cite WESA</p-->
 <hr>
-<h3>SeqD-HBM Online service:</h3> <!--TODO Change the name of the app -->
+<h3>SeqD-HBM User Input:</h3>
 <form enctype="multipart/form-data" action="/SeqDHBM/" method="post" autocomplete="off">
   {% csrf_token %}
   {% if errors %}
