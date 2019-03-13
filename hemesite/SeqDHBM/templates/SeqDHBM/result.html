@@ -6,7 +6,7 @@ table, th, td {
     border: 1px solid black;
 }
 body{
-  background-color: lightblue;
+  background-color: paleturquoise;
 }
 </style> <!-- TODO Put the style for the table in a CSS -->
 </head>
@@ -42,7 +42,7 @@ body{
             <th>9mer motif</th>
             <th>Net charge</th>
             <th>Comment</th>
-            <th>Kd or strength</th>
+            <th>Predicted K<sub>d</sub> (Feature coming soon!!)</th>
           </tr>
           {% for res in seq.result_hbm_set.all %}
             <tr>
@@ -83,7 +83,7 @@ body{
             <th>9mer motif</th>
             <th>Net charge</th>
             <th>Comment</th>
-            <th>Kd or strength</th>
+            <th>Predicted K<sub>d</sub> (Feature coming soon!)</th>
           </tr>
           {% for res in seq.result_hbm_set.all %}
             <tr>
