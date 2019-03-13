@@ -1,6 +1,7 @@
 # coding: utf-8
 
-"""Functions that handles requests from users"""
+"""Functions that handles requests from users. See urls.py for the urls that
+lead to each of the functions"""
 
 from __future__ import absolute_import, unicode_literals
 
@@ -20,23 +21,21 @@ from SeqDHBM.models import Job, Result_HBM, Sequence
 # TODO Create a github for the app
 # TODO Docstrings
 # TODO Replace localhost for IP
-# TODO unit testing!
-# TODO Upgrade the software to use yasara
-# TODO Read papers from the Bioinformatics Journals
+# TODO more unit testing!
 # TODO setup a different sgbd/web server (GUnicorn / apache)
-# TODO Model a db for the group's sequences
 # Future: celery has a 'chain' function that might be handy to pipe the
 #    homology -> docking -> md process
 
 
 def index(request):
     """
-    GIVEN: The website is active.
-    WHEN: The user accesses the main page or submits a job to be processed.
-    THEN: Show the webpage or validate the information and process the job.
+    Show the webpage or validate the information and process the job.
+    Called
 
     :param request: the http request (POST or GET)
-    :return: The home webpage of the site (or a redirect to the results page).
+    :return: The home webpage of the site (templates/index.html) or redirect
+    to the results page (views.show_result() below), if the user submitted
+    a job.
     """
 
     result = []
@@ -73,7 +72,7 @@ def show_result(request, job_id, passw: str = ""):
     :param job_id: The identifier of the job.
     :param passw: Security code to the given job
     :return: The formatted webpage with the requested information. The template
-    comes from one http file.
+    comes from templates/result.html.
     """
     template = loader.get_template('SeqDHBM/result.html')
     job = get_object_or_404(Job, id=job_id)
@@ -85,8 +84,9 @@ def show_result(request, job_id, passw: str = ""):
                         for x in range(0, len(seq.seqchain), 70)]
         context = {
             "job": job,
-            "processing": len([x for x in seqs 
-                               if x.status_hbm == Sequence.STATUS_QUEUED]),
+            "processed": len([x for x in seqs
+                             if x.status_hbm != Sequence.STATUS_QUEUED]),
+            "total_seq": len(seqs),
             "result": {x: y for x, y in res.items() 
                        if x.status_hbm == Sequence.STATUS_PROCESSED},
             "failed": {x: y for x, y in res.items() 
@@ -141,7 +141,7 @@ def hemewf(request, job_id, passw):
         message += "<p>file location: %s</p>" % seq.fasta_file_location
         the_warnings = '<br>'.join(seq.warnings_hbm.split('\n'))
         message += f"<p>Warnings: {the_warnings}</p>"
-        message += "<h1>Results</h1>"
+        message += "<h2>Results</h2>"
         for res in Result_HBM.objects.filter(sequence=seq):
             message += "<p>Sequence num: %d</p>" % res.sequence.id
             message += "<p>Coord atom: %s</p>" % res.coord_atom
