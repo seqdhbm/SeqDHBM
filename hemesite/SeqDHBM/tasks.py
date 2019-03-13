@@ -150,8 +150,8 @@ def access_wesa(seq_idx):
     #  an email address, send him the analysis
     if not seqs_from_job and seq_obj.jobnum.submittedby:
         site_domain = settings.SITE_DOMAIN
-        email_subject = f'SeqD-HBM: Your analysis ' +\
-                        f'number {seq_obj.jobnum.id} is complete'
+        email_subject = f'SeqD-HBM: Your results ' +\
+                        f'for job {seq_obj.jobnum.id} is ready'
         email_body = f"You can access your results at " + \
                      f"http://{site_domain}/SeqDHBM/" + \
                      f"{seq_obj.jobnum.id}/" + \

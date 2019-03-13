@@ -148,5 +148,8 @@ EMAIL_HOST_PASSWORD = cfg.EMAIL_HOST_PASSWORD
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+  os.path.join(BASE_DIR,'static'),
+)
 
 MAX_FILE_SIZE = 2097152  # 2MB

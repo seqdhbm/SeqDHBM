@@ -94,10 +94,12 @@ def process_form(form, submitted_files):
     password = myjob.pass_gen()
     if email:
         site_domain = settings.SITE_DOMAIN
-        body = "You can access your results at " + \
-               f"http://{site_domain}/SeqDHBM/{myjob.id}/{password}"
+        body = "Dear user,\n\nYour results for submission " +\
+                f"{myjob.id} is available at " + \
+               f"http://{site_domain}/SeqDHBM/{myjob.id}/{password}" +\
+               "\n\n Thank you for using SeqD-HBM!"
         e_msg = EmailMessage(
-            subject=f'SeqD-HBM: Your analysis number {myjob.id}',
+            subject=f'SeqD-HBM: your submission {myjob.id}',
             body=body,
             from_email='seqdhbm@gmail.com',
             to=[email],
