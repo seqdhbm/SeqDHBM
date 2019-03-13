@@ -14,15 +14,14 @@ body{
   <a href="{% url 'index' %}"> << Back to main page</a>
   <h2>SeqD-HBM heme binding prediction report for the submission of number {{ job.id }}</h2>
   <p>Submitted at {{ job.submission_date }}</p>
-  {% if processing > 0 %}
-    <h3>Note:</h3>
-    <p>There are still {{ processing }} sequences being processed by our server.</p>
-    <p>Refresh this page or access <a href="{% url 'result' job.id passw %}">this link</a> later </p>
-  {% endif %}
+    <p><b>{{ processed }}</b> out of <b>{{ total_seq }}</b> sequences were processed by our server.</p>
+  <p>You can access this result page by accessing <a href="{% url 'result' job.id passw %}">this link</a> later.
+      The full analysis for the job can be accessed <a href="{% url 'analysis' job.id passw %}">here</a>  </p>
   {% if failed %}
-    <h3>The following sequence(s) could not be processed: </h3>
+    <h3>The following sequence(s) had errors: </h3>
+    <ol>
     {% for seq, seqchain in failed.items %}
-        <h3>{{ seq.header }}</h3>
+        <h3><li> {{ seq.header }}</li></h3>
         <font size="-1" face= 'Courier New'>
           {% for line in seqchain %}
            <p> {{ line }}</p>
@@ -60,14 +59,16 @@ body{
         </table>
         {% endif %}
     {% endfor %}
+    </ol>
   {% endif %}
   {% if result and failed %}
   <hr>
   {% endif %}
   {% if result %}
     <h3>Results for the sequence(s) successfully processed:</h3>
+    <ol>
     {% for seq, seqchain in result.items %}
-        <h3>{{ seq.header }}</h3>
+        <h3><li> {{ seq.header }}</li></h3>
         <font size="-1" face= 'Courier New'>
           {% for line in seqchain %}
            <p> {{ line }}</p>
@@ -75,7 +76,8 @@ body{
         </font><i>
         {% if seq.mode == "W" %}<p>Solvent accessibility predicted by WESA</p>{% endif %}
         {% if seq.mode == "S" %}<p>No solvent accessibility prediction</p>{% endif %}
-        {% if seq.result_hbm_set.all|length %}</i>
+        </i>
+        {% if seq.result_hbm_set.all|length %}
         <table>
           <tr>
             <th>S.No</th>
@@ -104,6 +106,7 @@ body{
           {{ seq.warnings_hbm | linebreaksbr }}
         {% endautoescape %}
   {% endfor %}
+  </ol>
 {% endif %}
 </div>
 </html>

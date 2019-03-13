@@ -12,7 +12,8 @@ from . import fasta, pdbfiles, SeqDHBM
 
 def manage_fasta_files(fastafile: str, jobfolder: str):
     """
-    Reads the sequences from the fasta file and save them in the appropriate folder.
+    Reads the sequences from the fasta file and save them in the appropriate
+    folder.
 
     :param fastafile: File name
     :param jobfolder: Where the individual sequences will be saved in disk
@@ -37,18 +38,31 @@ def manage_fasta_files(fastafile: str, jobfolder: str):
                  "submitted_as": "Fasta File",
                  "fail": True,
                  "warnings": ["Error reading the fasta file sent by the user.",
-                              str(e)]
+                              str(e)],
+                 "analysis": f"The submitted fasta file {fastafile} " +
+                             f"could not be read.\n" +
+                             "The error message was:\n" +
+                             str(e)
                  }]
 
 
 def manage_pdb_ids():
-    """l = pdbfiles.text_to_list(pdbid)
-    pdbid_dict = pdbfiles.get_pdb_files(l)"""
-    # TODO save the fasta file and store the sequence in the dictionary
+    """Download the pdb files from the repository, convert to fasta and save
+    it and add the sequences to the dictionary (seq_list)"""
+
+    # l = pdbfiles.text_to_list(pdbid)
+    # pdbid_dict = pdbfiles.get_pdb_files(l)
     raise Exception("Not implemented")
 
 
-def manage_raw_sequence(rawseq, jobfolder):
+def manage_raw_sequence(rawseq: str, jobfolder: str):
+    """
+    Saves the manual input in a file and create an entry in the seq_list
+
+    :param rawseq: The input sequence
+    :param jobfolder: the folder to save the fasta file
+    :return: list with the dictionary containing information about the seq.
+    """
     folder = os.path.join(jobfolder, "MI")  # Manual Input
     file = "MI1.fasta"
     name = "Your input sequence"
@@ -73,8 +87,6 @@ def manage_pdb_files():
 
     :return:
     """
-
-    # TODO implement when needed
     """
         try:
             folder = ".".join(file.split(".")[:-1])  # remove extension
@@ -82,11 +94,11 @@ def manage_pdb_files():
             folder = file
         try:
             os.makedirs(folder, exist_ok=True)
-            # TODO: organize the files into folders -- I should use an auto increment to create the folders? :D
+            # TODO: organize the files into folders 
             shutil.move(os.path.join(folder, file), folder+"/"+file)
             pdbid_dict[folder] = folder+"/"+file
         except:
-            logging.error("Could not move file" + file + "\nSkipping it!")"""
+            logging.error("Could not move file" + file + '\nSkipping it!')"""
     raise Exception("Not implemented")
 
 
@@ -99,30 +111,36 @@ def workflow(jobfolder: str = "J0",
              job: models.Job = None) -> list:
     """
      Runs the workflow:
-     1) Reads the inputs from the user from all possible sources (fasta file, fasta sequence (and also pdb files,
-     pdb ids in the future).
+     1) Reads the inputs from the user from all possible sources (fasta file,
+     fasta sequence (and also pdb files, pdb ids in the future).
      2) Save the fasta sequences read into files and to the database.
      3) For each sequence: run the analysis, save the results in the database.
 
-    :param jobfolder: The relative folder where all the files from this run should be stored.
+    :param jobfolder: The relative folder where all the files from this run
+    should be stored.
     :param fastafile: One fasta file (no path).
     :param pdbs: list of pdb filenames (no path).
     :param pdbid: string with PDB codes (comma separated).
-    :param rawseq: an amino acid sequence: one letter, only 20 standard, no spaces, no linebreaks.
-    :param mode: 'wesa' (to predict the structure) or 'structure' (when structure is assumed to be known).
+    :param rawseq: an amino acid sequence: one letter, only 20 standard, no
+    spaces, no linebreaks.
+    :param mode: 'wesa' (to predict the structure) or 'structure' (when
+    structure is assumed to be known).
     :param job: the job object, if exists.
-    :return: A list of results in the form of a list of dictionaries. Each dictionary contains one of
-    the submitted sequences. The fields in the dictionary are:
+    :return: A list of results in the form of a list of dictionaries. Each
+    dictionary contains one of the submitted sequences. The fields in the
+    dictionary are:
     # seq: str - The amino acid sequence,
     # name: str - The header,
     # folder: str - the path to the file,
     # file: str - the name of the file,
-    # submitted_as: str - How it was submitted (Manual Input, Fasta File, PDB file, PDB id),
+    # submitted_as: str - How it was submitted (Manual Input, Fasta File,
+    PDB file, PDB id),
     # fail: bool - if the analysis failed,
     # warnings: list[str] - Warnings and errors
-    # result: dict - The results as a dictionary, where the keys are the coordinating amino acids and the values are
-    a dictionary with '9mer', 'charge', 'disulfide brige', ...
-    # analysis: list[str] - A long text description of the steps of the analysis.
+    # result: dict - The results as a dictionary, where the keys are the
+    coordinating amino acids and the values are a dictionary with '9mer',
+    'charge', 'disulfide brige', ...
+    # analysis: list[str] - A long description of the steps of the analysis.
     """
 
     if pdbs is None:
@@ -190,6 +208,10 @@ def workflow(jobfolder: str = "J0",
                 warnings = item['warnings']
             else:
                 warnings = []
+            if "analysis" in item:
+                analysis_msg = "\n".join(item['analysis'])
+            else:
+                analysis_msg = ""
             seq_obj = models.Sequence(
                 jobnum=job,
                 seqchain=item['seq'],
@@ -200,7 +222,8 @@ def workflow(jobfolder: str = "J0",
                 fasta_file_location=os.path.join(
                     item["folder"],
                     item["file"]),
-                warnings_hbm="\n".join(warnings)
+                warnings_hbm="\n".join(warnings),
+                partial_hbm_analysis=analysis_msg
             )
             seq_obj.save()
 

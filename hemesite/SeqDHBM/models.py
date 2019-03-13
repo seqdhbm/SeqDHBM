@@ -11,26 +11,38 @@ class Job(models.Model):
 
     def set_full_hbm_analysis(self, lines: list = None):
         """
-        Updates the Full report by copying the partial analysis of each sequence submitted
-        in the job.
+        Updates the Full report by copying the partial analysis of each
+        sequence submitted in the job.
 
         :param lines: The full report, in case it was already generated.
         :return:
         """
-        description = "*"*100
-        description += "\nSeqD-HBM : [Seq]uence based [D]etection of [H]eme [B]inding [M]otifs\n"
-        description += self.submission_date.strftime("%A , %B-%d-%Y, %H:%M:%S")
-        description += f"\nJob number {self.id}\n"
+        description = [
+            "*" * 100,
+            "SeqD-HBM : " +
+            "[Seq]uence based [D]etection of [H]eme [B]inding [M]otifs",
+            self.submission_date.strftime("%A , %B-%d-%Y, %H:%M:%S"),
+            f"Job number {self.id}\n"
+        ]
         if lines:  # only if mode == structure
-            description += f"Full analysis report\n{'*'*100}\n\n"
-            description += "\n\n\n".join(lines)
+            description += [
+                f"Full analysis report",
+                '*' * 100,
+                "",
+                "\n\n\n".join(lines)
+            ]
         else:
             sequences = Sequence.objects.filter(jobnum=self)
-            filtered = [x for x in sequences if x.status_hbm != Sequence.STATUS_QUEUED]
-            description += f"\n{len(filtered)} out of {len(sequences)} processed\n{'*'*100}\n\n"
-            for seq in filtered:
-                description += seq.partial_hbm_analysis + "\n\n\n"
-        self.full_hbm_analysis = description
+            filtered = [x for x in sequences
+                        if x.status_hbm != Sequence.STATUS_QUEUED]
+            description += [
+                f"{len(filtered)} out of {len(sequences)} processed",
+                '*'*100,
+                ""
+            ]
+            description += "\n\n\n".join([seq.partial_hbm_analysis
+                                          for seq in filtered])
+        self.full_hbm_analysis = "\n".join(description)
         self.save()
 
     def pass_gen(self):
@@ -39,7 +51,8 @@ class Job(models.Model):
 
         :return: The secret key. Shhhh!
         """
-        code = self.submission_date - datetime(1980, 11, 17, tzinfo=timezone.utc)
+        code = (self.submission_date
+                - datetime(1980, 11, 17, tzinfo=timezone.utc))
         return str(code.total_seconds())
 
 
@@ -80,7 +93,7 @@ class Sequence(models.Model):
     mode = models.CharField(max_length=1, choices=PREDICTION)
     status_hbm = models.CharField(max_length=1, choices=STATUS)
     partial_hbm_analysis = models.TextField(blank=True)
-    # status_homology
+    # status_homology  -- For additional functionality, when implemented
     # status_docking
     # status_md_sim
     fasta_file_location = models.FilePathField(
@@ -88,7 +101,8 @@ class Sequence(models.Model):
         allow_files=True,
         allow_folders=False
         )
-    # pdb_file_location = models.FilePathField(path=BASE_DIR, allow_files=True, allow_folders=False)
+    # pdb_file_location =
+    # models.FilePathField(path=BASE_DIR,allow_files=True,allow_folders=False)
     warnings_hbm = models.TextField(blank=True)
 
 
