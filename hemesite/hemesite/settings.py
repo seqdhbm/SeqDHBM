@@ -42,7 +42,7 @@ CELERY_IMPORTS = ['seqdhbm']
 DEBUG = cfg.DEBUG
 
 
-ALLOWED_HOSTS = ["131.220.127.75", "131.220.127.81", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["131.220.127.75", "131.220.127.81", "127.0.0.1", "localhost", "rms1705102"]
 # This will be used to send links to the user access the results
 SITE_DOMAIN = cfg.SITE_DOMAIN
 
