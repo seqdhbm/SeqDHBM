@@ -5,6 +5,8 @@ from django.conf import settings
 
 
 class SeqSubmission(forms.Form):
+    """The form to send sequences for analysis used in views.index()"""
+
     emaillabel = "Enter a valid email address to receive the complete \
     results for the submitted sequence(s). Email entry is MANDATORY in \
     cases where WESA solvent accessibility predictions are requested"
@@ -25,7 +27,12 @@ class SeqSubmission(forms.Form):
                             choices=CHOICES, initial="structure", widget=forms.RadioSelect())
     
     def clean(self):
-        """Checks if the form was filled correctly."""
+        """Checks if the form was filled correctly:
+        1. If there is data for analysis
+        2. If the file size is within the limit
+        3. If the manual input sequence has no headers
+        4. If the email was filled, when WESA prediction is requested
+        """
 
         cleaned_data = super().clean()
         msg = "No sequence was provided for analysis!"

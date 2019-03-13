@@ -2,12 +2,19 @@ from django.urls import path
 
 from . import views
 
+# requests are usually handled by the module hemesite/SeqDHBM/views.py
 urlpatterns = [
+    # handles requests to the main page
     path('', views.index, name='index'),
-    path('runworkflow/<int:job_id>/<passw>', views.hemewf, name='hemewf'),
-    path('<int:job_id>/<passw>/', views.show_result, name='result'),
-    path('analysis/<int:job_id>/<passw>/', views.show_analysis, name='analysis'),
+    # Handles requests for results without the password (hide information)
     path('<int:job_id>/', views.show_result, name='result'),
+    # Handles requests for results
+    path('<int:job_id>/<passw>/', views.show_result, name='result'),
+    # Shows the full analysis
+    path('analysis/<int:job_id>/<passw>/', views.show_analysis, name='analysis'),
+
+    path('runworkflow/<int:job_id>/<passw>/', views.hemewf, name='hemewf'),
+
     path('analysis/<int:job_id>/', views.show_analysis, name='analysis'),
     # path(<route>, <view>, <kwargs>, <name>)
     # <route> contains a URL pattern. Django starts at the first pattern in urlpatterns
