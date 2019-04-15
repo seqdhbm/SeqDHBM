@@ -91,18 +91,6 @@ def access_wesa(seq_idx):
     ]
     no_solvent_warn = "\nThe sequence has no solvent " +\
                       "accessible coordination residues"
-    wesa_error_msg = [
-        "\n",
-        f"{'*' * 80}\n ",
-        f"Unexpected WESA Error: %s\n ",
-        "Try again after a while"
-    ]
-    wesa_error_but_results = [
-        "\n",
-        f"{'*' * 80}\n",
-        "Showing the results without solvent accessibility analysis",
-        "\n"
-    ]
     try:
         wesa_result = SeqDHBM.get_results_from_wesa(seq_idx)
         if wesa_result:
@@ -125,8 +113,21 @@ def access_wesa(seq_idx):
         else:
             return
     except AssertionError as e:
+        # fixed an error here in 2019/04/15
+        wesa_error_msg = [
+            "\n",
+            f"{'*' * 80}\n ",
+            f"Unexpected WESA Error: {e}\n ",
+            "Try again after a while"
+        ]
+        wesa_error_but_results = [
+            "\n",
+            f"{'*' * 80}\n",
+            "Showing the results without solvent accessibility analysis",
+            "\n"
+        ]
         seq_obj = models.Sequence.objects.get(pk=seq_idx)
-        for line in wesa_error_msg%e:
+        for line in wesa_error_msg:
             seq_obj.partial_hbm_analysis += line
         results = models.Result_HBM.objects.filter(sequence=seq_idx)
         if results:  # Check if there is any ninemer left
