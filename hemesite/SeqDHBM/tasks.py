@@ -94,7 +94,7 @@ def access_wesa(seq_idx):
     wesa_error_msg = [
         "\n",
         f"{'*' * 80}\n ",
-        f"Unexpected WESA Error: {e}\n ",
+        f"Unexpected WESA Error: %s\n ",
         "Try again after a while"
     ]
     wesa_error_but_results = [
@@ -126,7 +126,7 @@ def access_wesa(seq_idx):
             return
     except AssertionError as e:
         seq_obj = models.Sequence.objects.get(pk=seq_idx)
-        for line in wesa_error_msg:
+        for line in wesa_error_msg%e:
             seq_obj.partial_hbm_analysis += line
         results = models.Result_HBM.objects.filter(sequence=seq_idx)
         if results:  # Check if there is any ninemer left
