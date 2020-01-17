@@ -1,5 +1,5 @@
+{% load static from staticfiles %}
 <!DOCTYPE html>
-{% load static %}
 <html>
 <head>
   {% load staticfiles %}
@@ -38,7 +38,7 @@ https://zhanglab.ccmb.med.umich.edu/I-TASSER/
   The program processes the input sequence through a systematic stepwise validation,
   extracting at each step relevant features from the sequence to produce a tabulated list of the possible heme-coordination sites available for the given sequence.
 </p>
-<!--img src="/SeqDHBM/static/algotithm_flow.png" alt="SeqD-HBM Algorithm" style="width:500px;height:600px;"-->
+<img src="{% static 'SeqDHBM/algotithm_flow.png' %}"/>
 
 <p class="center">
 If you use SeqD-HBM in any part of your work, please cite:<br>

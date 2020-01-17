@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from . import views
 
@@ -24,3 +25,5 @@ urlpatterns = [
     # <kwargs> parameters
     # <name> Naming your URL lets you refer to it unambiguously from elsewhere in Django, especially from within templates
 ]
+
+urlpatterns += staticfiles_urlpatterns()

@@ -91,18 +91,6 @@ def access_wesa(seq_idx):
     ]
     no_solvent_warn = "\nThe sequence has no solvent " +\
                       "accessible coordination residues"
-    wesa_error_msg = [
-        "\n",
-        f"{'*' * 80}\n ",
-        f"Unexpected WESA Error: {e}\n ",
-        "Try again after a while"
-    ]
-    wesa_error_but_results = [
-        "\n",
-        f"{'*' * 80}\n",
-        "Showing the results without solvent accessibility analysis",
-        "\n"
-    ]
     try:
         wesa_result = SeqDHBM.get_results_from_wesa(seq_idx)
         if wesa_result:
@@ -125,6 +113,19 @@ def access_wesa(seq_idx):
         else:
             return
     except AssertionError as e:
+        # fixed an error here in 2019/04/15
+        wesa_error_msg = [
+            "\n",
+            f"{'*' * 80}\n ",
+            f"Unexpected WESA Error: {e}\n ",
+            "Try again after a while"
+        ]
+        wesa_error_but_results = [
+            "\n",
+            f"{'*' * 80}\n",
+            "Showing the results without solvent accessibility analysis",
+            "\n"
+        ]
         seq_obj = models.Sequence.objects.get(pk=seq_idx)
         for line in wesa_error_msg:
             seq_obj.partial_hbm_analysis += line
@@ -150,8 +151,8 @@ def access_wesa(seq_idx):
     #  an email address, send him the analysis
     if not seqs_from_job and seq_obj.jobnum.submittedby:
         site_domain = settings.SITE_DOMAIN
-        email_subject = f'SeqD-HBM: Your analysis ' +\
-                        f'number {seq_obj.jobnum.id} is complete'
+        email_subject = f'SeqD-HBM: Your results ' +\
+                        f'for job {seq_obj.jobnum.id} is ready'
         email_body = f"You can access your results at " + \
                      f"http://{site_domain}/SeqDHBM/" + \
                      f"{seq_obj.jobnum.id}/" + \
