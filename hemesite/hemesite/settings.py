@@ -14,9 +14,7 @@ import os
 
 from . import local_settings as cfg
 
-
-# this import should bring some of the passwords that can't be pushed to
-
+# It's secret o.O
 SECRET_KEY = cfg.SECRET_KEY
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -43,6 +41,7 @@ DEBUG = cfg.DEBUG
 
 
 ALLOWED_HOSTS = ["131.220.127.75", "131.220.127.81", "127.0.0.1", "localhost", "rms1705102"]
+
 # This will be used to send links to the user access the results
 SITE_DOMAIN = cfg.SITE_DOMAIN
 
@@ -88,7 +87,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'hemesite.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -148,5 +146,21 @@ EMAIL_HOST_PASSWORD = cfg.EMAIL_HOST_PASSWORD
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+# Security measures
 
-MAX_FILE_SIZE = 2097152  # 2MB
+# Change SECURE_PROXY_SSL_HEADER if the server is behind a proxy. Check the
+# link for more information:
+# https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECURE_PROXY_SSL_HEADER
+# SECURE_PROXY_SSL_HEADER = None
+
+SECURE_SSL_REDIRECT = False
+# SECURE_HSTS_SECONDS = 20
+
+MAX_FILE_SIZE = 2097152  # 2MB - There are not many fasta files that large
+
+# DEPLOYMENT
+WSGI_APPLICATION
+
