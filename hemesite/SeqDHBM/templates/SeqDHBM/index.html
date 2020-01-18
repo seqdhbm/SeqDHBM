@@ -51,8 +51,12 @@ If you use <a href="http://pipe.scs.fsu.edu/wesa/">WESA</a> to perform solvent a
 Please Note : Sequences exceeding 2000 residues will not be processed via WESA but the usual SeqD-HBM analysis will be done. Moreover, depending on sequence length, each sequence requires anything between 5 to 30 minutes for processing by WESA.
 </p>
 <p class="center">
-  Further enhancements to the web interface and the underlying logic are a work in progress.
-  For queries regarding SeqD-HBM and the usage of this site please contact Ajay A. Paul George (ajgeorge@uni-bonn.de) 
+    Further enhancements to the web interface and the underlying logic are a work in progress.
+</p>
+<p class="center">
+    A demo of the use of the webservice can be accessed
+    <a href="{% static 'SeqDHBM/website_demo.pdf' %}">here</a>.
+    For queries regarding SeqD-HBM and the usage of this site please contact Ajay A. Paul George (ajgeorge@uni-bonn.de).
 </p>
 <p class="center">
  If our research interests you, please visit our <a href="https://www.pharma.uni-bonn.de/www/pharmazeutische-biochemie-und-bioanalytik">homepage</a> for further details.
@@ -83,8 +87,40 @@ Please Note : Sequences exceeding 2000 residues will not be processed via WESA b
           <font color="fa0000"> {{ field.errors }} </font>
       </div>
   {% endfor %}
-  <input type="submit" value="Submit">
+    <input type="submit" value="Submit">
+    <input type="button" value="Clear" onclick="clearIt()">
+    <input type="button" value="Load Example" onclick="loadExample()">
+    <!--
+>HlyC_sequence_1
+MNINKPLEILG2VSWLWASSPL2RNWPVSLFAINVLPAIQANQ3VLLTRDD3PVA31SWA
+NLSLENEIK3LNDVTSLVAEDWTSGDRKWFIDWIAPFGDNGAL3K3MRKKFPDELFRAIR
+VDPKT2VGKVSEF2GGKIDKQLANKIFKQ322ELITEVKRKSDFNFSLTG
+>HlyC_sequence_2
+ANINKPLEILG2VSWLWASSPL2RNWPVSLFAINVLPAIQANQ3VLLTRDD3PVA31SWA
+NLSLENEIK3LNDVTSLVAEDWTSGDRKWFIDWIAPFGDNGAL3K3MRKKFPDELFRAIR
+VDPKT2VGKVSEF2GGKIDKQLANKIFKQ322ELITEVKRKSDFNFSLTG
+>HlyC_sequence_3
+ANINKPLEILGHVSWLWASSPLCRNWPVSLFAINVLPAIQANQYVLLTRDDYPVAHCSWA
+NLSLENEIKYLNDVTSLVAEDWTSGDRKWFIDWIAPFGDNGALYKYMRKKFPDELFRAIR
+VDPKTHVGKVSEFHGGKIDKQLANKIFKQYHHELITEVKRKSDFNFSLTG-->
+
+    <script>
+    function clearIt() {
+        document.getElementById("id_email").value = "";
+        document.getElementById("id_rawseq").value = "";
+        document.getElementById("id_fastafiles").value = "";
+        document.getElementById("id_mode_0").checked = true;
+    }
+    </script>
+    <script>
+    function loadExample() {
+        example = "MNINKPLEILG2VSWLWASSPL2RNWPVSLSFAINVLPAIQANQ3VLLTRDD3PVA31SWA\nNLSLENEIK3LNDVTSLVAEDWTSGDRKWFIDWIAPFGDNGAL3K3MRKKFPDELFRAIR\nVDPKT2VGKVSEF2GGKIDKQLANKIFKQ322ELITEVKRKSDFNFSLTG";
+        document.getElementById("id_rawseq").value = example;
+    }
+    </script>
+
 </form>
+
 
 <p id="userresult"></p>
 {% if results %}
@@ -105,5 +141,9 @@ Please Note : Sequences exceeding 2000 residues will not be processed via WESA b
     {% endfor %}
 {% endif %}
 <font color="00fa00">{{ debug }}</font>
+<p class="center">
+  The datasets used to generate the k<sub>d</sub> can be downloaded
+    <a href="{% static 'SeqDHBM/training_data.zip' %}" download>here</a>.
+</p>
 </body>
 </html>
