@@ -3,6 +3,7 @@
 """Asynchronous functions."""
 
 from __future__ import absolute_import, unicode_literals
+import logging
 import time
 
 from celery import shared_task
@@ -28,6 +29,24 @@ __all__ = [
 # hemesitefolder$ celery -A hemesite beat --detach -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 # https://www.youtube.com/watch?v=VoTxTM6kBuU&list=RDEM7S2Y1zXF-I77fRXilXb6Ew&index=27
 
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler('/home/imhof_team/Public/git/hemesite/del_debug.log')
+fh.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+logger.addHandler(ch)
+logger.addHandler(fh)
+
+
+def dummy_function_for_ajay(sequence: str) -> float:
+    """Replace the call for this function for whatever function you use to
+    obtain the K_d."""
+    if sequence:
+        return 0.
+    else:
+        return 1.
+
 
 @shared_task
 def assync_organize_seq(seq_list):
@@ -36,7 +55,6 @@ def assync_organize_seq(seq_list):
     WHEN: a new job is created and the user submits multiple sequences inside a fasta file.
     THEN: The fasta sequences are saved in files in the jobs folder for future use in yasara.
     """
-
     time.sleep(1)
     fasta.organize_sequences2(seq_list)
     return "Files saved"
@@ -45,7 +63,8 @@ def assync_organize_seq(seq_list):
 @shared_task
 def assync_save_results(seq_idx, results_dict):
     """
-    GIVEN: The user sent sequences for analysis in any of the provided input methods.
+    GIVEN: The user sent sequences for analysis in any of the provided input
+    methods.
     WHEN: The sequence was analysed using the HBM Sequence detector.
     THEN: Save the results in the db.
 
@@ -53,16 +72,18 @@ def assync_save_results(seq_idx, results_dict):
     :param results_dict:
     :return: A message
     """
-
     time.sleep(.5)
     seq_obj = models.Sequence.objects.get(pk=seq_idx)
     for coord, res in results_dict.items():
+        logger.debug(type(res))
+        logger.debug(res)
         res_obj = models.Result_HBM(
             sequence=seq_obj,
             coord_atom=coord,
-            ninemer=res["ninemer"],
+            ninemer=res['ninemer'],
             net_charge=res['netcharge'],
-            disulfide_possible=bool(res['comment'].strip())
+            disulfide_possible=bool(res['comment'].strip()),
+            k_d=res['kd'],
         )
         res_obj.save()
     if (seq_obj.status_hbm != models.Sequence.STATUS_FAILED and
@@ -102,7 +123,8 @@ def access_wesa(seq_idx):
 
             results = models.Result_HBM.objects.filter(sequence=seq_idx)
             if results:  # Check if there is any ninemer left
-                seq_obj.partial_hbm_analysis += "\n" + result_to_pretty_table(results)
+                seq_obj.partial_hbm_analysis += "\n"
+                seq_obj.partial_hbm_analysis += result_to_pretty_table(results)
             else:
                 # and add the warning if they are all buried
                 for line in no_solvent_analysis_msg:
@@ -173,15 +195,17 @@ def check_for_pending_sequences():
     """
     GIVEN: The website is running.
     WHEN: Periodically, scheduled.
-    THEN: If there are any pending sequence, try to read from the WESA server and
-    update the records in the database.
+    THEN: If there are any pending sequence, try to read
+    the WESA server and update the records in the database.
 
     :return: A message to the Queue Handler
     """
-
     queryset = models.Sequence.objects.filter(
-            status_hbm=models.Sequence.STATUS_QUEUED,
-            mode=models.Sequence.WESA_MODE)
+        status_hbm=models.Sequence.STATUS_QUEUED,
+        mode=models.Sequence.WESA_MODE
+    )
+    # with open('/home/imhof_team/Public/git/hemesite/del_debug.txt', 'w') as f:
+    #     f.write(queryset)
     for seq in queryset:
         access_wesa.delay(seq.id)
     return f"There were {len(queryset)} sequences pending"
@@ -201,12 +225,13 @@ def result_to_pretty_table(results):
         "9mer motif",
         "Net charge",
         "Comment",
-        "Kd or strength"])  # TODO Predicted Kd? Strength as another field?
+        "Kd or strength"
+    ])
     for pos, record in enumerate(sorted(results, key=lambda x: int(x.coord_atom[1:]))):
         table.add_row([pos + 1,
                        record.coord_atom,
                        record.ninemer,
                        record.net_charge,
                        "Possible S-S Bond" if record.disulfide_possible else " " * 17,
-                       ""])
+                       record.k_d])
     return str(table)

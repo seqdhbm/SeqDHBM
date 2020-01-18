@@ -1,9 +1,11 @@
 # coding: utf-8
 
+import json
 import logging
 import os
 import re
 import time
+from typing import Dict, List
 import unittest
 
 from django.conf import settings
@@ -13,8 +15,36 @@ from prettytable import PrettyTable
 from seqdhbm import fasta
 
 
+class Result(dict):
+    def __init__(self, ninemer, netcharge, comment, kd):
+        dict.__init__(
+            self,
+            ninemer=ninemer,
+            netcharge= netcharge,
+            comment=comment,
+            kd=kd
+        )
+
+
+class Analysis:
+    def __init__(
+            self,
+            mode: str,
+            result: Dict[str, Result] = None,
+            warnings: List[str] = None,
+            analysis: str = '',
+            fail: bool = False
+    ):
+        self.result = result if result else dict()
+        self.warnings = warnings if warnings else list()
+        self.mode = mode
+        self.analysis = analysis
+        self.fail = fail
+
+
 def sequence_validity_check(current_sequence_list: str) -> int:
-    """Takes a list of characters and checks if each element in the list is part of the 20 standard amino acids
+    """Takes a list of characters and checks if each element in the list is
+    part of the 20 standard amino acids
 
     Return a flag value based on the number of errors in the input
     If all characters are valid then the flag should be 0
@@ -22,8 +52,8 @@ def sequence_validity_check(current_sequence_list: str) -> int:
     standard_aa_list = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
                         'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']  # List of the 20 standard amino acids
     flag = 0
-    for i in range(len(current_sequence_list)):
-        if current_sequence_list[i] not in standard_aa_list:
+    for aa in current_sequence_list:
+        if aa not in standard_aa_list:
             flag += 1
     return flag
 
@@ -119,8 +149,9 @@ def get_results_from_wesa(seq_pk):
     """Checks the WESA server if the results are ready.
 
     :param seq_pk: The identifier of the sequence
-    :return: When ready, a dictionary with the position of each aa (keys) and the surface accessibility,
-            Otherwise returns false
+    :return: When ready, a dictionary with the position
+    of each aa (keys) and the surface accessibility,
+     Otherwise returns false
     """
 
     wesa_dir = os.path.join(settings.BASE_DIR, "wesa")
@@ -145,7 +176,9 @@ def get_results_from_wesa(seq_pk):
     elif ("Job done" in lines) or ("Online version of the prediction is" in lines):
         pass
     else:
-        logging.error("The WESA Team might have changed the content of the results")
+        logging.error(
+            "The WESA Team might have changed the content of the results"
+        )
         logging.error(f"Check the file SeqDHBM2WESA{seq_pk}.out" +
                       " and adapt the program.")
         return False
@@ -163,7 +196,8 @@ def get_results_from_wesa(seq_pk):
 
 
 def disulfide_bond_check(ninemer, cys_cnt):
-    """Checks if the ninemer contains a non-coordinating Cys a.a. and there is another Cys in the protein.
+    """Checks if the ninemer contains a non-coordinating Cys a.a. and
+    there is another Cys in the protein.
 
     :param ninemer: The 9mer being analysed
     :param cys_cnt: The number of Cys in the whole chain
@@ -172,29 +206,52 @@ def disulfide_bond_check(ninemer, cys_cnt):
     return "Possible S-S Bond" if (cys_cnt > 1 and ("C" in ninemer[:4]+ninemer[5:])) else " "*17
 
 
-def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
+def dummy_function_for_ajay(sequence: str) -> float:
+    """"""
+    if sequence:
+        return 0.
+    else:
+        return 1.
+
+
+def spot_coordination_site(
+        fasta_dict: Dict['str', 'str'],
+        seq_id: int,
+        mode: str
+) -> Dict[str, Analysis]:
     """Analyse the sequence for transient binding sites.
     1. Find Cys, His or Tyr
     2. Check if the adjacency is basic
-    3. If the solvent accessibility has to be predicted, submit the sequence to the WESA service
+    3. If the solvent accessibility has to be predicted, submit the sequence
+    to the WESA service
     4. Compile the results
 
-    :param fasta_dict: The sequences to be analysed in a dictionary formatted as {header: sequence}
+    :param fasta_dict: The sequences to be analysed in a dictionary formatted
+    as {header: sequence}
     :param seq_id: The database id of the sequence
-    :param mode: 'wesa' for solvent accessibility prediction. 'structure' to skip this check
+    :param mode: 'wesa' for solvent accessibility prediction. 'structure' to
+    skip this check
     :return: The predicted coodinating sites.
     """
 
     # TODO refactor this long function
 
-    filtered_dict = {}  # Empty dictionary that will contain only valid sequences
+    filtered_dict = {}  # To store only valid sequences
     max_seq_length_for_wesa = 2000
     usrout = []
 
     output = {}
+    out = {}
     """ the results of the check. Key is the fasta header and the values are another
          dictionary with:
          results:{coordinating_atom: {ninemer, netcharge, spacercheck}
+         warnings: []
+         analysis ""
+         fail: true/false
+         } """
+    """ the results of the check. Key is the fasta header and the values are a
+         named tuple with:
+         results:{coordinating_atom: Results
          warnings: []
          analysis ""
          fail: true/false
@@ -203,11 +260,8 @@ def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
     ###############################
     # Check for sequence validity #
     ###############################
-    sno = 0
-    for header, sequence in fasta_dict.items():  # Iterate through the dictionary
-        sno += 1
+    for header, sequence in fasta_dict.items():
         current_sequence = sequence
-        current_sequence_list = list(current_sequence)  # Split the sequence into a list
 
         if len(current_sequence) < 9:
             mylog(logging.INFO, usrout, "--------------------------")
@@ -220,7 +274,13 @@ def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
                               "fail": True,
                               "mode": mode,
                               "warnings": ["The sequence is too short (minimum: 9 amino acids)"]}
-        elif sequence_validity_check(current_sequence_list) == 0:  # Pass the list to the SequenceValidityCheck function
+            out[header] = Analysis(
+                mode=mode,
+                analysis="\n".join(usrout),
+                fail=True,
+                warnings=["The sequence is too short (minimum: 9 amino acids)"]
+            )
+        elif sequence_validity_check(current_sequence) == 0:  # Pass the list to the SequenceValidityCheck function
             filtered_dict[header] = sequence  # Add only the valid sequences to the new dictionary
         else:
             mylog(logging.INFO, usrout, "--------------------------")
@@ -235,22 +295,27 @@ def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
                               "mode": mode,
                               "warnings": ["The sequence contains invalid characters " +
                                            "other than the 20 standard amino acids"]}
+            out[header] = Analysis(
+                mode=mode,
+                analysis="\n".join(usrout),
+                fail=True,
+                warnings=["The sequence contains invalid characters " +
+                          "other than the 20 standard amino acids"]
+            )
 
+    # Add information about the sequences with error to the output analysis.
     if len(fasta_dict) != len(filtered_dict):
         for header, sequence in fasta_dict.items():
             if header not in filtered_dict:
                 mylog(logging.INFO, usrout, "%s\n%s" % (header[1:], "\n".join(fasta.break_fasta_sequence(sequence))))
 
-    if len(filtered_dict) == 0:  # if this dictionary is empty, all sequences have errors and the program must exit
-        for header in fasta_dict:
-            output[header]["analysis"] = "\n".join(usrout)
-        return output
+    if len(filtered_dict) == 0:  # if there are no valid sequences...
+        return out  # output
 
     #################################
     # Work with the valid sequences #
     #################################
     seq_with_coord = 0
-    sno = 0
     for header, current_sequence in filtered_dict.items():  # Iterate through the dictionary
         initial_ninemer_dict = {}  # An empty dictionary that will contain the residue number
         # and the associated 9 mer as key value pair eg. {H150: 'XXXXHXXXX'}
@@ -265,7 +330,9 @@ def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
             "analysis": "",
             "mode": mode,
             "fail": False}  # initialize the informative dictionary
-        sno += 1
+        out[header] = Analysis(
+            mode=mode,
+        )
 
         ###############################
         # Check for coodinating sites #
@@ -309,7 +376,7 @@ def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
             for aa, ninemer in initial_ninemer_dict.items():
                 # check if the coordinating aa is Cysteine
                 if aa[0] == 'C':
-                    pos = int(aa[1:])-1  # the position on string
+                    pos = int(aa[1:]) - 1  # the position on string
                     dict_for_net_charge_calc[aa] = ninemer
                     # If it is a CP motif, also store in a dictionary
                     if pos < len(current_sequence)-1 and current_sequence[pos+1] == 'P':
@@ -318,7 +385,6 @@ def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
             ###############################
             # Check for basic amino acids #
             ###############################
-            # TODO Ask if we still to look for adjacent basic aa now that we are accepting Cys based and CP motifs
             mylog(logging.INFO, usrout, "ADJACENT BASIC AMINO ACID CHECK:")
             mylog(logging.INFO, usrout, "-" * 35)
             mylog(logging.INFO, usrout, "NOTE : Screening all potential motifs for adjacent basic amino acids")
@@ -354,7 +420,14 @@ def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
                 output[header]["warnings"] += ["None of the 9mers have valid motifs.",
                                                "The likelihood of any part of this sequence binding" +
                                                " or coordinating heme is very low"]
+                out[header].warnings.extend([
+                    "None of the 9mers have valid motifs.",
+                    "The likelihood of any part of this sequence binding"
+                    + " or coordinating heme is very low"
+                ])
                 output[header]["fail"] = False
+                out[header].fail = False
+
                 mylog(logging.INFO, usrout, "-" * 50)
                 mylog(logging.INFO, usrout, "-" * 50)
                 continue
@@ -377,34 +450,52 @@ def spot_coordination_site(fasta_dict: dict, seq_id: int, mode: str):
                     "No coordination sites passed the net charge check.",
                     "It is very likely that this sequence does not bind/coordinate heme"
                 ]
+                out[header].warnings.extend([
+                    "No coordination sites passed the net charge check.",
+                    "It is very likely that this sequence "
+                    + "does not bind/coordinate heme"
+                ])
                 continue
 
             # (Re-add when necessary)
-            # spacer_dict = spacer_check(pass_charge_dict, pass_charge_index_list, spacer_dict)
+            # spacer_dict = spacer_check(
+            #    pass_charge_dict, pass_charge_index_list, spacer_dict
+            # )
 
             # WESA supports only sequences with length up to 2000
             if (mode == "wesa") and (len(current_sequence) > max_seq_length_for_wesa):
-                inform_wesa_incompatibility(len(current_sequence), header, max_seq_length_for_wesa, output, usrout)
+                inform_wesa_incompatibility(len(current_sequence), header, max_seq_length_for_wesa, out, usrout)
 
             if (mode == "structure") or (len(current_sequence) > max_seq_length_for_wesa):
                 # structure
-                save_results_structure_mode(cys_count, header, output, pass_charge_dict, pass_charge_out_dict, usrout)
+                save_results_structure_mode(cys_count, header, out, pass_charge_dict, pass_charge_out_dict, usrout)
             else:
                 # WESA
                 mylog(logging.INFO, usrout, "Sending sequence to the WESA server for solvent accessibility prediction")
                 ship_seq_to_wesa2(current_sequence, seq_id)
                 output[header]["result"] = {}
+                # out[header]. result ja ta inicializado
                 for coord in sorted(pass_charge_dict.keys(), key=lambda x: int(x[1:])):
+                    out[header].result[coord] = Result(
+                        ninemer=pass_charge_dict[coord],
+                        netcharge=pass_charge_out_dict[coord],
+                        comment=disulfide_bond_check(
+                            pass_charge_dict[coord],
+                            cys_count
+                        ),
+                        kd=dummy_function_for_ajay(pass_charge_dict[coord])
+                    )
                     output[header]["result"][coord] = {"ninemer": pass_charge_dict[coord],
                                                        "netcharge": pass_charge_out_dict[coord],
                                                        "comment": disulfide_bond_check(pass_charge_dict[coord],
                                                                                        cys_count)}
             output[header]["analysis"] = "\n".join(usrout)
+            out[header].analysis = "\n".join(usrout)
 
         else:  # When there are no coordinating sites in the sequence
-            no_coord_site_warning(header, output, usrout)
-            return output
-    return output
+            no_coord_site_warning(header, out, usrout)
+            return out
+    return out
 
 
 def precheck_coordinating_sites(current_sequence: str, header: str, usrout: list):
@@ -471,29 +562,57 @@ def inform_wesa_incompatibility(current_sequence_length, header, max_seq_length_
     msg2 = f"This sequence has {current_sequence_length} a.a. " + \
            f"and is not supported."
     for msg in [msg1, msg2]:
-        output[header]["warnings"] += [msg]
+        # output[header]["warnings"] += [msg]
+        output[header].warnings.append(msg)
         mylog(logging.WARNING, usrout, msg)
     output[header]["mode"] = "structure"
 
 
-def save_results_structure_mode(cys_count, header, output, pass_charge_dict, pass_charge_out_dict, usrout):
+def save_results_structure_mode(
+        cys_count,
+        header,
+        output,
+        pass_charge_dict,
+        pass_charge_out_dict,
+        usrout
+):
     # All checks done, preparing tabular summary
     """Prepare output lists for PrettyTable"""
     mylog(logging.INFO, usrout, "*" * 80)
     mylog(logging.INFO, usrout, "TABULAR SUMMARY")
     mylog(logging.INFO, usrout, "NOTE : Please use the available structure "
                                 "information to only consider those motifs that are \"surface exposed\"")
-    table = PrettyTable(["S.no", "Coord. residue", "9mer motif", "Net charge", "Comment", "Kd or strength"])
+    table = PrettyTable([
+        "S.no",
+        "Coord. residue",
+        "9mer motif",
+        "Net charge",
+        "Comment",
+        "Kd or strength"
+    ])
     sr_no = 0
-    output[header]["result"] = {}
+    # output[header]["result"] = {}
     for coord in sorted(pass_charge_dict.keys(), key=lambda x: int(x[1:])):
-        output[header]["result"][coord] = {"ninemer": pass_charge_dict[coord],
-                                           "netcharge": pass_charge_out_dict[coord],
-                                           "comment": disulfide_bond_check(pass_charge_dict[coord],
-                                                                           cys_count)}
+        bond_check = disulfide_bond_check(
+            pass_charge_dict[coord],
+            cys_count
+        )
+        r = Result(
+            ninemer=pass_charge_dict[coord],
+            netcharge=pass_charge_out_dict[coord],
+            comment=bond_check,
+            kd=dummy_function_for_ajay(pass_charge_dict[coord])
+        )
+        output[header].result[coord] = r
         sr_no += 1
-        table.add_row([sr_no, coord, pass_charge_dict[coord], pass_charge_out_dict[coord],
-                       disulfide_bond_check(pass_charge_dict[coord], cys_count), ""])
+        table.add_row([
+            sr_no,
+            coord,
+            pass_charge_dict[coord],
+            pass_charge_out_dict[coord],
+            bond_check,
+            ""
+        ])
     mylog(logging.INFO, usrout, str(table))
 
 
@@ -502,7 +621,8 @@ def no_coord_site_warning(header, output, usrout):
     msg1 = "NOTE : The sequence does not have potential heme coordination sites(C, H, Y) !!"
     msg2 = "It is very likely that this sequence does not bind/coordinate heme"
     for msg in [msg1, msg2]:
-        output[header]["warnings"] += [msg]
+        # output[header]["warnings"] += [msg]
+        output[header].warnings.append(msg)
         mylog(logging.INFO, usrout, msg)
 
 

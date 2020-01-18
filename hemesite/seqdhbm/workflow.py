@@ -102,13 +102,15 @@ def manage_pdb_files():
     raise Exception("Not implemented")
 
 
-def workflow(jobfolder: str = "J0",
-             fastafile: str = None,
-             pdbs: list = None,
-             pdbid: str = "",
-             rawseq: str = "",
-             mode: str = "structure",
-             job: models.Job = None) -> list:
+def workflow(
+        jobfolder: str = "J0",
+        fastafile: str = None,
+        pdbs: list = None,
+        pdbid: str = "",
+        rawseq: str = "",
+        mode: str = "structure",
+        job: models.Job = None
+) -> list:
     """
      Runs the workflow:
      1) Reads the inputs from the user from all possible sources (fasta file,
@@ -196,60 +198,66 @@ def workflow(jobfolder: str = "J0",
             seq_list += [{}]  # Implement
 
     # Run the motif check
-    for item in seq_list:
+    for input_seq in seq_list:
         seq_obj = None  # model object
         if job:
             _sub = None
             for sub_form_id, sub_form_desc in models.Sequence.SUBMISSION_FORMS:
-                if item["submitted_as"] == sub_form_desc:
+                if input_seq["submitted_as"] == sub_form_desc:
                     _sub = sub_form_id
-            _stat = models.Sequence.STATUS_FAILED if "fail" in item else models.Sequence.STATUS_QUEUED
-            if "warnings" in item:
-                warnings = item['warnings']
+            _stat = models.Sequence.STATUS_FAILED if "fail" in input_seq else models.Sequence.STATUS_QUEUED
+            if "warnings" in input_seq:
+                warnings = input_seq['warnings']
             else:
                 warnings = []
-            if "analysis" in item:
-                analysis_msg = "\n".join(item['analysis'])
+            if "analysis" in input_seq:
+                analysis_msg = "\n".join(input_seq['analysis'])
             else:
                 analysis_msg = ""
             seq_obj = models.Sequence(
                 jobnum=job,
-                seqchain=item['seq'],
+                seqchain=input_seq['seq'],
                 submittedas=_sub,
-                mode=models.Sequence.WESA_MODE if mode == "wesa" else models.Sequence.STRUCTURE_MODE,
-                header=item["name"],
+                mode=(
+                    models.Sequence.WESA_MODE
+                    if mode == "wesa"
+                    else models.Sequence.STRUCTURE_MODE
+                ),
+                header=input_seq["name"],
                 status_hbm=_stat,
                 fasta_file_location=os.path.join(
-                    item["folder"],
-                    item["file"]),
+                    input_seq["folder"],
+                    input_seq["file"]),
                 warnings_hbm="\n".join(warnings),
                 partial_hbm_analysis=analysis_msg
             )
             seq_obj.save()
 
         # Test if there is no input error
-        if "fail" not in item:
+        if "fail" not in input_seq:
             # Then run the analysis
             analysis = SeqDHBM.spot_coordination_site(
-                {">"+item["name"]: item["seq"]},
+                {">"+input_seq["name"]: input_seq["seq"]},
                 seq_obj.id,
                 mode
-                )
+            )
             # and update with the results
-            analysed_seq = analysis[">" + item["name"]]
-            if ("fail" in analysed_seq) and (analysed_seq["fail"]):
+            analysed_seq = analysis[">" + input_seq["name"]]
+            if analysed_seq.fail:
                 seq_obj.status_hbm = models.Sequence.STATUS_FAILED
-            elif analysed_seq["mode"] != mode:
-                seq_obj.mode = (models.Sequence.STRUCTURE_MODE
-                                if analysed_seq["mode"] == "structure"
-                                else models.Sequence.WESA_MODE)
-            seq_obj.partial_hbm_analysis = analysed_seq["analysis"]
+            elif analysed_seq.mode != mode:
+                seq_obj.mode = (
+                    models.Sequence.STRUCTURE_MODE
+                    if analysed_seq["mode"] == "structure"
+                    else models.Sequence.WESA_MODE
+                )
+            seq_obj.partial_hbm_analysis = analysed_seq.analysis
 
-            item["result"] = analysed_seq["result"]
-            item["analysis"] = analysed_seq["analysis"]
-            item["warnings"] = analysed_seq["warnings"]
-            seq_obj.warnings_hbm = "\n".join(analysed_seq["warnings"])
+            input_seq["result"] = analysed_seq.result
+            input_seq["analysis"] = analysed_seq.analysis
+            input_seq["warnings"] = analysed_seq.warnings
+            seq_obj.warnings_hbm = "\n".join(analysed_seq.warnings)
             seq_obj.save()
-            tasks.assync_save_results.delay(seq_obj.id, analysed_seq["result"])
+            tasks.assync_save_results.delay(seq_obj.id, analysed_seq.result)
 
     return seq_list

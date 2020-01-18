@@ -10,8 +10,7 @@ class Job(models.Model):
     full_hbm_analysis = models.TextField(blank=True)
 
     def set_full_hbm_analysis(self, lines: list = None):
-        """
-        Updates the Full report by copying the partial analysis of each
+        """Updates the Full report by copying the partial analysis of each
         sequence submitted in the job.
 
         :param lines: The full report, in case it was already generated.
@@ -116,4 +115,5 @@ class Result_HBM(models.Model):  # Result_HBM
     ninemer = models.CharField(max_length=9)
     net_charge = models.CharField(max_length=20)
     disulfide_possible = models.BooleanField()
+    k_d = models.FloatField()
     # spacer_check =
