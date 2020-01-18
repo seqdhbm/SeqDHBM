@@ -15,9 +15,12 @@ body{
   <h2>SeqD-HBM heme binding prediction report for the submission of number {{ job.id }}</h2>
   <p>Submitted at {{ job.submission_date }}</p>
     <p><b>{{ processed }}</b> out of <b>{{ total_seq }}</b> sequences were processed by our server.</p>
-  <p>You can access this result page by accessing <a href="{% url 'result' job.id passw %}">this link</a> later.
-      The full analysis for the job can be accessed <a href="{% url 'analysis' job.id passw %}">here</a>  </p>
-  {% if failed %}
+  <p>You can access this result page by accessing
+      <a href="{% url 'result' job.id passw %}">this link</a> later.
+      The full analysis for the job can be accessed
+      <a href="{% url 'analysis' job.id passw %}"
+         download="seqdhbm_job{{job.id}}.txt">here</a>  </p>
+    {% if failed %}
     <h3>The following sequence(s) had errors: </h3>
     <ol>
     {% for seq, seqchain in failed.items %}
@@ -41,7 +44,7 @@ body{
             <th>9mer motif</th>
             <th>Net charge</th>
             <th>Comment</th>
-            <th>Predicted K<sub>d</sub> (Feature coming soon!!)</th>
+            <th>Predicted K<sub>d</sub></th>
           </tr>
           {% for res in seq.result_hbm_set.all %}
             <tr>
@@ -52,8 +55,8 @@ body{
               <td>{% if res.disulfide_possible %}
                 Possible S-S bond
               {% endif %}
-              </td></td>
-              <td>
+              </td>
+              <td> {{res.k_d }} </td>
             </tr>
           {% endfor %}
         </table>
@@ -85,7 +88,7 @@ body{
             <th>9mer motif</th>
             <th>Net charge</th>
             <th>Comment</th>
-            <th>Predicted K<sub>d</sub> (Feature coming soon!)</th>
+            <th>Predicted K<sub>d</sub> </th>
           </tr>
           {% for res in seq.result_hbm_set.all %}
             <tr>
@@ -96,8 +99,8 @@ body{
               <td>{% if res.disulfide_possible %}
                 Possible S-S bond
               {% endif %}
-              </td></td>
-              <td>
+              </td>
+              <td> {{res.k_d }} </td>
             </tr>
           {% endfor %}
         </table>
