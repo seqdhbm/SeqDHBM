@@ -11,7 +11,7 @@ django-timezone-field==3.0
 Flask==1.0.2
 Flask-SQLAlchemy==2.3.2
 itsdangerous==1.1.0
-Jinja2==2.10
+Jinja2==2.11.3
 kombu==4.4.0
 MarkupSafe==1.1.1
 numpy==1.15.4
