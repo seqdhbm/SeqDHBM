@@ -1,7 +1,7 @@
 amqp==2.4.2
 billiard==3.5.0.5
 biopython==1.72
-celery==4.2.1
+celery==5.2.2
 certifi==2018.10.15
 Click==7.0
 Django==2.1.3
